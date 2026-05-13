@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Gastro objednávky</title>
-<script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gastro objednávky</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-gray-100 min-h-screen">
@@ -15,11 +15,11 @@
     <p class="text-gray-600 mb-8 text-lg">Vyber režim zařízení</p>
 
     <div class="space-y-4">
-      <button onclick="setMode('staff')" class="w-full bg-green-600 text-white text-2xl font-bold py-5 rounded-2xl">
+      <button type="button" onclick="setMode('staff')" class="w-full bg-green-600 hover:bg-green-700 text-white text-2xl font-bold py-5 rounded-2xl">
         🧾 Obsluha
       </button>
 
-      <button onclick="setMode('kitchen')" class="w-full bg-black text-white text-2xl font-bold py-5 rounded-2xl">
+      <button type="button" onclick="setMode('kitchen')" class="w-full bg-black hover:bg-gray-800 text-white text-2xl font-bold py-5 rounded-2xl">
         👨‍🍳 Kuchyň / Monitor
       </button>
     </div>
@@ -28,222 +28,530 @@
 
 <div class="max-w-6xl mx-auto p-4">
 
-<div id="staffPanel" class="bg-white rounded-3xl shadow-xl p-6 hidden">
+  <div id="statusBox" class="mb-4 rounded-2xl bg-yellow-100 border border-yellow-300 p-3 text-sm">
+    Připojuji Firebase...
+  </div>
 
-<div class="flex items-center justify-between mb-6">
-<h1 class="text-3xl font-bold">🍔 Nová objednávka</h1>
+  <!-- OBSLUHA -->
+  <div id="staffPanel" class="bg-white rounded-3xl shadow-xl p-6 hidden">
+    <div class="flex items-center justify-between gap-3 mb-6">
+      <h1 class="text-3xl font-bold">🍔 Nová objednávka</h1>
 
-<button onclick="setMode('kitchen')" class="bg-black text-white px-4 py-3 rounded-2xl font-bold">
-👨‍🍳 Kuchyň
-</button>
-</div>
+      <button type="button" onclick="setMode('kitchen')" class="bg-black text-white px-4 py-3 rounded-2xl font-bold">
+        👨‍🍳 Kuchyň
+      </button>
+    </div>
 
-<div class="bg-yellow-100 rounded-2xl p-4 text-center mb-4">
-<div class="text-lg font-semibold">💰 Celková cena</div>
-<div id="totalPrice" class="text-4xl font-bold">0 Kč</div>
-</div>
+    <div class="bg-yellow-100 rounded-2xl p-4 text-center mb-4">
+      <div class="text-lg font-semibold">💰 Celková cena</div>
+      <div id="totalPrice" class="text-4xl font-bold">0 Kč</div>
+    </div>
 
-<div class="grid grid-cols-2 gap-3 mb-4">
-<button onclick="addItem('Párek v rohlíku',30,true)" class="bg-white border rounded-2xl p-4 text-xl font-bold">🌭 Párek<br><span class="text-base">30 Kč</span></button>
-<button onclick="addItem('Grilovaný hermelín',60,false)" class="bg-white border rounded-2xl p-4 text-xl font-bold">🧀 Hermelín<br><span class="text-base">60 Kč</span></button>
-<button onclick="addItem('Burger',230,false)" class="bg-white border rounded-2xl p-4 text-xl font-bold">🍔 Burger<br><span class="text-base">230 Kč</span></button>
-<button onclick="addItem('Palačinky',40,false)" class="bg-white border rounded-2xl p-4 text-xl font-bold">🥞 Palačinky<br><span class="text-base">40 Kč</span></button>
-<button onclick="addItem('Grilované maso',140,false)" class="bg-white border rounded-2xl p-4 text-xl font-bold col-span-2">🍖 Grilované maso<br><span class="text-base">140 Kč</span></button>
-</div>
+    <div class="grid grid-cols-2 gap-3 mb-4">
+      <button type="button" onclick="addItem('Párek v rohlíku',30,true)" class="bg-white border rounded-2xl p-4 text-xl font-bold hover:bg-red-100">
+        🌭 Párek<br><span class="text-base">30 Kč</span>
+      </button>
 
-<div class="bg-white border rounded-2xl p-4">
-<div class="flex justify-between items-center mb-4">
-<h2 class="text-2xl font-bold">🛒 Aktuální objednávka</h2>
-<button onclick="resetOrderNumbers()" class="bg-red-600 text-white px-4 py-2 rounded-xl font-bold">🔄 Reset čísel</button>
-</div>
+      <button type="button" onclick="addItem('Grilovaný hermelín',60,false)" class="bg-white border rounded-2xl p-4 text-xl font-bold hover:bg-yellow-100">
+        🧀 Hermelín<br><span class="text-base">60 Kč</span>
+      </button>
 
-<div id="currentOrder" class="space-y-3"></div>
-</div>
+      <button type="button" onclick="addItem('Burger',230,false)" class="bg-white border rounded-2xl p-4 text-xl font-bold hover:bg-orange-100">
+        🍔 Burger<br><span class="text-base">230 Kč</span>
+      </button>
 
-<textarea id="poznamka" class="w-full mt-4 p-3 rounded-xl border text-xl" rows="3" placeholder="poznámka"></textarea>
+      <button type="button" onclick="addItem('Palačinky',40,false)" class="bg-white border rounded-2xl p-4 text-xl font-bold hover:bg-pink-100">
+        🥞 Palačinky<br><span class="text-base">40 Kč</span>
+      </button>
 
-<button onclick="sendOrder()" class="w-full mt-6 bg-green-600 text-white text-2xl font-bold py-4 rounded-2xl">
-➕ Odeslat objednávku
-</button>
-</div>
+      <button type="button" onclick="addItem('Grilované maso',140,false)" class="bg-white border rounded-2xl p-4 text-xl font-bold hover:bg-green-100 col-span-2">
+        🍖 Grilované maso<br><span class="text-base">140 Kč</span>
+      </button>
+    </div>
 
-<div id="kitchenPanel" class="bg-black text-white rounded-3xl shadow-xl p-6 hidden min-h-screen">
-<div class="flex justify-between items-center mb-6">
-<h2 class="text-3xl font-bold">👨‍🍳 Kuchyň</h2>
-<button onclick="setMode('staff')" class="bg-white text-black px-4 py-3 rounded-2xl font-bold">🧾 Obsluha</button>
-</div>
+    <div class="bg-white border rounded-2xl p-4">
+      <div class="flex justify-between items-center mb-4 gap-3">
+        <h2 class="text-2xl font-bold">🛒 Aktuální objednávka</h2>
 
-<div id="orders" class="space-y-4"></div>
-</div>
+        <button type="button" onclick="resetOrderNumbers()" class="bg-red-600 text-white px-4 py-2 rounded-xl font-bold">
+          🔄 Reset čísel
+        </button>
+      </div>
+
+      <div id="currentOrder" class="space-y-3"></div>
+    </div>
+
+    <textarea id="poznamka" class="w-full mt-4 p-3 rounded-xl border text-xl" rows="3" placeholder="poznámka"></textarea>
+
+    <button id="sendBtn" type="button" onclick="sendOrder()" class="w-full mt-6 bg-green-600 hover:bg-green-700 text-white text-2xl font-bold py-4 rounded-2xl">
+      ➕ Odeslat objednávku
+    </button>
+
+    <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 mt-4">
+      <div class="flex items-center justify-between gap-3 mb-3">
+        <h2 class="text-2xl font-bold">📊 Přehled prodeje</h2>
+        <button type="button" onclick="resetSalesStats()" class="bg-red-600 text-white px-4 py-2 rounded-xl font-bold">
+          🧹 Vynulovat přehled
+        </button>
+      </div>
+
+      <div id="salesStats" class="text-xl space-y-2">
+        Načítám přehled...
+      </div>
+    </div>
+
+  </div>
+
+  <!-- KUCHYŇ -->
+  <div id="kitchenPanel" class="bg-black text-white rounded-3xl shadow-xl p-6 hidden min-h-screen">
+    <div class="flex justify-between items-center mb-6 gap-3">
+      <h2 class="text-3xl font-bold">👨‍🍳 Kuchyň</h2>
+
+      <button type="button" onclick="setMode('staff')" class="bg-white text-black px-4 py-3 rounded-2xl font-bold">
+        🧾 Obsluha
+      </button>
+    </div>
+
+    <div id="orders" class="space-y-4"></div>
+  </div>
 
 </div>
 
 <script>
-let currentItems = [];
-let orders = JSON.parse(localStorage.getItem('orders') || '[]');
-let orderCounter = Number(localStorage.getItem('orderCounter') || '0');
+window.app = {
+  currentItems: [],
+  orders: [],
+  dbReady: false,
+  firebaseError: null
+};
 
-function setMode(mode){
-localStorage.setItem('gastro_mode', mode);
-const overlay = document.getElementById('modeOverlay');
-if(overlay) overlay.remove();
+function setStatus(message, type = 'info') {
+  const box = document.getElementById('statusBox');
+  if (!box) return;
 
-document.getElementById('staffPanel').classList.add('hidden');
-document.getElementById('kitchenPanel').classList.add('hidden');
+  box.innerText = message;
 
-if(mode === 'staff'){
- document.getElementById('staffPanel').classList.remove('hidden');
- document.body.classList.remove('bg-black');
- document.body.classList.add('bg-gray-100');
-}else{
- document.getElementById('kitchenPanel').classList.remove('hidden');
- document.body.classList.remove('bg-gray-100');
- document.body.classList.add('bg-black');
- renderOrders();
+  box.className = 'mb-4 rounded-2xl p-3 text-sm border';
+
+  if (type === 'ok') {
+    box.className += ' bg-green-100 border-green-300 text-green-900';
+  } else if (type === 'error') {
+    box.className += ' bg-red-100 border-red-300 text-red-900';
+  } else {
+    box.className += ' bg-yellow-100 border-yellow-300 text-yellow-900';
+  }
 }
+
+window.setMode = function(mode) {
+  localStorage.setItem('gastro_mode', mode);
+
+  const overlay = document.getElementById('modeOverlay');
+  if (overlay) overlay.remove();
+
+  const staffPanel = document.getElementById('staffPanel');
+  const kitchenPanel = document.getElementById('kitchenPanel');
+
+  staffPanel.classList.add('hidden');
+  kitchenPanel.classList.add('hidden');
+
+  if (mode === 'kitchen') {
+    kitchenPanel.classList.remove('hidden');
+    document.body.classList.remove('bg-gray-100');
+    document.body.classList.add('bg-black');
+    renderOrders();
+  } else {
+    staffPanel.classList.remove('hidden');
+    document.body.classList.add('bg-gray-100');
+    document.body.classList.remove('bg-black');
+    renderCurrentOrder();
+  }
 }
 
-function addItem(name, price, sauce){
-currentItems.push({
- id: Date.now() + Math.random(),
- name,
- price,
- sauce: sauce ? 'kečup' : ''
+window.addItem = function(name, price, hasSauce) {
+  window.app.currentItems.push({
+    id: String(Date.now()) + String(Math.random()).slice(2),
+    name: name,
+    price: price,
+    sauce: hasSauce ? 'kečup' : ''
+  });
+
+  renderCurrentOrder();
+}
+
+window.removeItem = function(id) {
+  window.app.currentItems = window.app.currentItems.filter(function(item) {
+    return item.id !== id;
+  });
+
+  renderCurrentOrder();
+}
+
+window.updateSauce = function(id, value) {
+  window.app.currentItems = window.app.currentItems.map(function(item) {
+    if (item.id === id) item.sauce = value;
+    return item;
+  });
+
+  renderCurrentOrder();
+}
+
+function renderCurrentOrder() {
+  const container = document.getElementById('currentOrder');
+  const totalPrice = document.getElementById('totalPrice');
+
+  if (!container || !totalPrice) return;
+
+  container.innerHTML = '';
+
+  let total = 0;
+
+  if (window.app.currentItems.length === 0) {
+    container.innerHTML = '<div class="text-gray-400 text-xl">Zatím nic v objednávce.</div>';
+  }
+
+  window.app.currentItems.forEach(function(item) {
+    total += item.price;
+
+    const div = document.createElement('div');
+    div.className = 'bg-gray-100 rounded-2xl p-3';
+
+    let sauceHtml = '';
+    if (item.sauce !== '') {
+      sauceHtml = `
+        <select onchange="window.updateSauce('${item.id}', this.value)" class="p-2 rounded-xl border">
+          <option value="kečup" ${item.sauce === 'kečup' ? 'selected' : ''}>kečup</option>
+          <option value="hořčice" ${item.sauce === 'hořčice' ? 'selected' : ''}>hořčice</option>
+          <option value="oboje" ${item.sauce === 'oboje' ? 'selected' : ''}>oboje</option>
+        </select>
+      `;
+    }
+
+    div.innerHTML = `
+      <div class="flex justify-between items-center gap-3">
+        <div>
+          <div class="font-bold text-xl">${item.name}</div>
+          <div>${item.price} Kč</div>
+        </div>
+        ${sauceHtml}
+        <button type="button" onclick="removeItem('${item.id}')" class="bg-red-500 text-white px-4 py-2 rounded-xl">✕</button>
+      </div>
+    `;
+
+    container.appendChild(div);
+  });
+
+  totalPrice.innerText = total + ' Kč';
+}
+
+function renderOrders() {
+  const container = document.getElementById('orders');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  if (window.app.orders.length === 0) {
+    container.innerHTML = '<div class="text-gray-400 text-2xl">Zatím žádné objednávky.</div>';
+    return;
+  }
+
+  window.app.orders.slice().reverse().forEach(function(order) {
+    const div = document.createElement('div');
+    div.className = 'rounded-2xl p-4 ' + (order.done ? 'bg-green-700' : 'bg-gray-800');
+
+    const itemsHtml = (order.items || []).map(function(item) {
+      return `<div>• ${item.name} ${item.sauce ? '(' + item.sauce + ')' : ''}</div>`;
+    }).join('');
+
+    const number = order.orderNumber ? '#' + order.orderNumber : '#?';
+
+    const buttonHtml = order.done
+      ? `<button type="button" onclick="deleteOrder('${order.firebaseId}')" class="mt-4 w-full py-3 rounded-xl text-xl font-bold bg-red-600">🗑️ Smazat objednávku</button>`
+      : `<button type="button" onclick="markDone('${order.firebaseId}')" class="mt-4 w-full py-3 rounded-xl text-xl font-bold bg-green-600">✅ Označit jako hotové</button>`;
+
+    div.innerHTML = `
+      <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-2 mb-3">
+        <div class="text-3xl font-bold">Objednávka ${number}</div>
+        <div class="text-xl">${order.time || ''}</div>
+        <div class="text-yellow-300 font-bold text-3xl">${order.total || 0} Kč</div>
+      </div>
+      <div class="space-y-2 text-2xl">${itemsHtml}</div>
+      ${order.note ? `<div class="mt-3 text-yellow-300 text-xl">📝 ${order.note}</div>` : ''}
+      ${buttonHtml}
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+function calculateSalesStats() {
+  const stats = {
+    "Párek v rohlíku": { count: 0, total: 0 },
+    "Grilovaný hermelín": { count: 0, total: 0 },
+    "Burger": { count: 0, total: 0 },
+    "Palačinky": { count: 0, total: 0 },
+    "Grilované maso": { count: 0, total: 0 }
+  };
+
+  let grandTotal = 0;
+
+  window.app.orders.forEach(function(order) {
+    if (order.deletedFromStats) return;
+
+    (order.items || []).forEach(function(item) {
+      if (!stats[item.name]) {
+        stats[item.name] = { count: 0, total: 0 };
+      }
+
+      stats[item.name].count += 1;
+      stats[item.name].total += Number(item.price || 0);
+      grandTotal += Number(item.price || 0);
+    });
+  });
+
+  return { stats: stats, grandTotal: grandTotal };
+}
+
+function renderSalesStats() {
+  const box = document.getElementById('salesStats');
+  if (!box) return;
+
+  const data = calculateSalesStats();
+  const stats = data.stats;
+
+  let html = '';
+
+  Object.keys(stats).forEach(function(name) {
+    html += `
+      <div class="flex justify-between border-b border-blue-200 pb-1">
+        <span>${name}</span>
+        <strong>${stats[name].count} ks / ${stats[name].total} Kč</strong>
+      </div>
+    `;
+  });
+
+  html += `
+    <div class="flex justify-between pt-3 text-2xl">
+      <span class="font-bold">Celkem</span>
+      <strong>${data.grandTotal} Kč</strong>
+    </div>
+  `;
+
+  box.innerHTML = html;
+}
+
+function resetSalesStats() {
+  if (!confirm('Opravdu vynulovat přehled prodeje? Objednávky v kuchyni zůstanou, ale přehled začne od nuly.')) {
+    return;
+  }
+
+  if (!window.app.dbReady || !window.firebaseClearSalesStats) {
+    alert('Firebase ještě není načtený. Zkus to prosím za pár sekund.');
+    return;
+  }
+
+  window.firebaseClearSalesStats()
+    .then(function() {
+      alert('Přehled prodeje byl vynulován.');
+    })
+    .catch(function(error) {
+      alert('Chyba při nulování: ' + error.message);
+    });
+}
+
+window.sendOrder = async function() {
+  if (window.app.currentItems.length === 0) {
+    alert('Přidej alespoň jednu položku');
+    return;
+  }
+
+  if (!window.app.dbReady || !window.firebaseAddOrderWithNumber) {
+    alert('Firebase není načtený. Zkontroluj internet nebo oprávnění Firestore. Detail: ' + (window.app.firebaseError || 'čeká se na připojení'));
+    return;
+  }
+
+  const sendBtn = document.getElementById('sendBtn');
+  sendBtn.disabled = true;
+  sendBtn.innerText = 'Odesílám...';
+
+  try {
+    const total = window.app.currentItems.reduce(function(sum, item) {
+      return sum + item.price;
+    }, 0);
+
+    const orderData = {
+      time: new Date().toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' }),
+      items: window.app.currentItems.map(function(item) { return { ...item }; }),
+      note: document.getElementById('poznamka').value,
+      total: total,
+      done: false,
+      createdAt: Date.now()
+    };
+
+    const orderNumber = await window.firebaseAddOrderWithNumber(orderData);
+
+    window.app.currentItems = [];
+    document.getElementById('poznamka').value = '';
+    renderCurrentOrder();
+
+    alert('Objednávka #' + orderNumber + ' odeslána do kuchyně');
+  } catch (error) {
+    console.error(error);
+    alert('Objednávku se nepodařilo odeslat: ' + error.message);
+    setStatus('Chyba při odesílání: ' + error.message, 'error');
+  } finally {
+    sendBtn.disabled = false;
+    sendBtn.innerText = '➕ Odeslat objednávku';
+  }
+}
+
+window.markDone = function(id) {
+  if (window.app.dbReady && window.firebaseMarkDone) {
+    window.firebaseMarkDone(id).catch(function(error) {
+      alert('Chyba: ' + error.message);
+    });
+  }
+}
+
+window.deleteOrder = function(id) {
+  if (confirm('Opravdu smazat objednávku?') && window.app.dbReady && window.firebaseDeleteOrder) {
+    window.firebaseDeleteOrder(id).catch(function(error) {
+      alert('Chyba: ' + error.message);
+    });
+  }
+}
+
+window.resetOrderNumbers = function() {
+  if (!window.app.dbReady || !window.firebaseResetCounter) {
+    alert('Firebase ještě není načtený. Zkus to prosím za pár sekund.');
+    return;
+  }
+
+  if (confirm('Opravdu resetovat číslování? Další nová objednávka bude #1.')) {
+    window.firebaseResetCounter()
+      .then(function() {
+        alert('Hotovo. Další objednávka bude #1.');
+      })
+      .catch(function(error) {
+        alert('Chyba resetu: ' + error.message);
+      });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  renderCurrentOrder();
+  renderOrders();
+
+  const savedMode = localStorage.getItem('gastro_mode');
+  if (savedMode) {
+    setMode(savedMode);
+  }
 });
-renderCurrentOrder();
-}
+</script>
 
-function removeItem(id){
-currentItems = currentItems.filter(item => item.id !== id);
-renderCurrentOrder();
-}
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    onSnapshot,
+    updateDoc,
+    deleteDoc,
+    doc,
+    runTransaction,
+    setDoc
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-function updateSauce(id,val){
-currentItems = currentItems.map(item => {
- if(item.id === id) item.sauce = val;
- return item;
-});
-renderCurrentOrder();
-}
+  const firebaseConfig = {
+    apiKey: "AIzaSyBVG375wTkQkp7bfuQ7yXFdKniFEQ04aAI",
+    authDomain: "gastro1-c61d5.firebaseapp.com",
+    projectId: "gastro1-c61d5",
+    storageBucket: "gastro1-c61d5.firebasestorage.app",
+    messagingSenderId: "460537867842",
+    appId: "1:460537867842:web:81ce374a66ca85dad347db"
+  };
 
-function renderCurrentOrder(){
-const container = document.getElementById('currentOrder');
-const totalPrice = document.getElementById('totalPrice');
-container.innerHTML = '';
-let total = 0;
+  try {
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    window.app.dbReady = true;
+    window.app.firebaseError = null;
+    setStatus('Firebase připojeno – objednávky se budou propisovat do kuchyně.', 'ok');
 
-currentItems.forEach(item => {
- total += item.price;
- const div = document.createElement('div');
- div.className = 'bg-gray-100 rounded-2xl p-3';
- div.innerHTML = `
- <div class="flex justify-between items-center gap-3">
- <div>
- <div class="font-bold text-xl">${item.name}</div>
- <div>${item.price} Kč</div>
- </div>
- ${item.sauce !== '' ? `
- <select onchange="updateSauce('${item.id}', this.value)" class="p-2 rounded-xl border">
- <option ${item.sauce==='kečup'?'selected':''}>kečup</option>
- <option ${item.sauce==='hořčice'?'selected':''}>hořčice</option>
- <option ${item.sauce==='oboje'?'selected':''}>oboje</option>
- </select>`:''}
- <button onclick="removeItem('${item.id}')" class="bg-red-500 text-white px-4 py-2 rounded-xl">✕</button>
- </div>`;
- container.appendChild(div);
-});
+    window.firebaseAddOrderWithNumber = async function(orderData) {
+      const counterRef = doc(db, 'settings', 'orderCounter');
 
-totalPrice.innerText = total + ' Kč';
-}
+      const nextNumber = await runTransaction(db, async function(transaction) {
+        const counterSnap = await transaction.get(counterRef);
+        const current = counterSnap.exists() ? (counterSnap.data().value || 0) : 0;
+        const next = current + 1;
 
-function sendOrder(){
-if(currentItems.length === 0){
- alert('Přidej položku');
- return;
-}
+        transaction.set(counterRef, { value: next }, { merge: true });
+        return next;
+      });
 
-orderCounter++;
-localStorage.setItem('orderCounter', orderCounter);
+      await addDoc(collection(db, 'orders'), {
+        ...orderData,
+        orderNumber: nextNumber
+      });
 
-const total = currentItems.reduce((sum,item)=>sum+item.price,0);
+      return nextNumber;
+    };
 
-orders.push({
- id: Date.now(),
- orderNumber: orderCounter,
- items: [...currentItems],
- total: total,
- note: document.getElementById('poznamka').value,
- done:false,
- time:new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'})
-});
+    window.firebaseMarkDone = function(id) {
+      return updateDoc(doc(db, 'orders', id), { done: true });
+    };
 
-localStorage.setItem('orders', JSON.stringify(orders));
+    window.firebaseDeleteOrder = function(id) {
+      return deleteDoc(doc(db, 'orders', id));
+    };
 
-currentItems = [];
-document.getElementById('poznamka').value = '';
-renderCurrentOrder();
-renderOrders();
+    window.firebaseResetCounter = function() {
+      return setDoc(doc(db, 'settings', 'orderCounter'), { value: 0 }, { merge: true });
+    };
 
-alert('Objednávka odeslána do kuchyně');
-}
+    window.firebaseClearSalesStats = async function() {
+      const resetTime = Date.now();
 
-function renderOrders(){
-const container = document.getElementById('orders');
-container.innerHTML = '';
+      const ordersToMark = window.app.orders.filter(function(order) {
+        return !order.deletedFromStats;
+      });
 
-orders = JSON.parse(localStorage.getItem('orders') || '[]');
+      for (const order of ordersToMark) {
+        await updateDoc(doc(db, 'orders', order.firebaseId), {
+          deletedFromStats: true,
+          statsResetAt: resetTime
+        });
+      }
+    };
 
-orders.slice().reverse().forEach(order=>{
- const div = document.createElement('div');
- div.className = 'rounded-2xl p-4 ' + (order.done ? 'bg-green-700':'bg-gray-800');
- div.innerHTML = `
- <div class="flex justify-between items-center mb-3">
- <div class="text-3xl font-bold">Objednávka #${order.orderNumber}</div>
- <div class="text-yellow-300 text-3xl font-bold">${order.total} Kč</div>
- </div>
- <div class="space-y-2 text-2xl">
- ${order.items.map(item=>`<div>• ${item.name} ${item.sauce ? '('+item.sauce+')':''}</div>`).join('')}
- </div>
- ${order.note ? `<div class="mt-3 text-yellow-300 text-xl">📝 ${order.note}</div>`:''}
- ${order.done ? `
- <button onclick="deleteOrder('${order.id}')" class="mt-4 w-full py-3 rounded-xl text-xl font-bold bg-red-600">🗑️ Smazat objednávku</button>
- `:`
- <button onclick="markDone('${order.id}')" class="mt-4 w-full py-3 rounded-xl text-xl font-bold bg-green-600">✅ Označit jako hotové</button>
- `}
- `;
- container.appendChild(div);
-});
-}
+    onSnapshot(collection(db, 'orders'), function(snapshot) {
+      window.app.orders = [];
 
-function markDone(id){
-orders = orders.map(order=>{
- if(String(order.id)===String(id)) order.done = true;
- return order;
-});
-localStorage.setItem('orders', JSON.stringify(orders));
-renderOrders();
-}
+      snapshot.forEach(function(docSnap) {
+        window.app.orders.push({
+          firebaseId: docSnap.id,
+          ...docSnap.data()
+        });
+      });
 
-function deleteOrder(id){
-orders = orders.filter(order => String(order.id)!==String(id));
-localStorage.setItem('orders', JSON.stringify(orders));
-renderOrders();
-}
+      window.app.orders.sort(function(a, b) {
+        return (a.createdAt || 0) - (b.createdAt || 0);
+      });
 
-function resetOrderNumbers(){
-if(confirm('Resetovat čísla objednávek?')){
- orderCounter = 0;
- localStorage.setItem('orderCounter','0');
-}
-}
+      renderOrders();
+      renderSalesStats();
+    }, function(error) {
+      console.error(error);
+      window.app.firebaseError = error.message;
+      setStatus('Chyba Firebase: ' + error.message, 'error');
+    });
 
-document.addEventListener('DOMContentLoaded',()=>{
-renderCurrentOrder();
-const mode = localStorage.getItem('gastro_mode');
-if(mode){
- setMode(mode);
-}
-});
+  } catch (error) {
+    console.error(error);
+    window.app.firebaseError = error.message;
+    setStatus('Firebase se nepodařilo načíst: ' + error.message, 'error');
+  }
 </script>
 
 </body>
