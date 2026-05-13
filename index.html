@@ -91,7 +91,7 @@
       <div class="flex items-center justify-between gap-3 mb-3">
         <div>
           <h2 class="text-2xl font-bold">📊 Přehled prodeje</h2>
-          <div class="text-sm text-gray-600">Počítá i objednávky skryté z kuchyně.</div>
+          <div class="text-sm text-gray-600">Počítá i objednávky, které jsou už skryté z kuchyně.</div>
         </div>
         <button type="button" onclick="resetSalesStats()" class="bg-red-600 text-white px-4 py-2 rounded-xl font-bold">
           🧹 Vynulovat přehled
@@ -102,7 +102,6 @@
         Načítám přehled...
       </div>
     </div>
-
   </div>
 
   <!-- KUCHYŇ -->
@@ -133,7 +132,6 @@ function setStatus(message, type = 'info') {
   if (!box) return;
 
   box.innerText = message;
-
   box.className = 'mb-4 rounded-2xl p-3 text-sm border';
 
   if (type === 'ok') {
@@ -145,7 +143,7 @@ function setStatus(message, type = 'info') {
   }
 }
 
-window.setMode = function(mode) {
+function setMode(mode) {
   localStorage.setItem('gastro_mode', mode);
 
   const overlay = document.getElementById('modeOverlay');
@@ -162,16 +160,16 @@ window.setMode = function(mode) {
     document.body.classList.remove('bg-gray-100');
     document.body.classList.add('bg-black');
     renderOrders();
-      calculateSalesStats();
   } else {
     staffPanel.classList.remove('hidden');
     document.body.classList.add('bg-gray-100');
     document.body.classList.remove('bg-black');
     renderCurrentOrder();
+    renderSalesStats();
   }
 }
 
-window.addItem = function(name, price, hasSauce) {
+function addItem(name, price, hasSauce) {
   window.app.currentItems.push({
     id: String(Date.now()) + String(Math.random()).slice(2),
     name: name,
@@ -182,7 +180,7 @@ window.addItem = function(name, price, hasSauce) {
   renderCurrentOrder();
 }
 
-window.removeItem = function(id) {
+function removeItem(id) {
   window.app.currentItems = window.app.currentItems.filter(function(item) {
     return item.id !== id;
   });
@@ -190,7 +188,7 @@ window.removeItem = function(id) {
   renderCurrentOrder();
 }
 
-window.updateSauce = function(id, value) {
+function updateSauce(id, value) {
   window.app.currentItems = window.app.currentItems.map(function(item) {
     if (item.id === id) item.sauce = value;
     return item;
@@ -222,7 +220,7 @@ function renderCurrentOrder() {
     let sauceHtml = '';
     if (item.sauce !== '') {
       sauceHtml = `
-        <select onchange="window.updateSauce('${item.id}', this.value)" class="p-2 rounded-xl border">
+        <select onchange="updateSauce('${item.id}', this.value)" class="p-2 rounded-xl border">
           <option value="kečup" ${item.sauce === 'kečup' ? 'selected' : ''}>kečup</option>
           <option value="hořčice" ${item.sauce === 'hořčice' ? 'selected' : ''}>hořčice</option>
           <option value="oboje" ${item.sauce === 'oboje' ? 'selected' : ''}>oboje</option>
@@ -253,6 +251,9 @@ function renderOrders() {
 
   container.innerHTML = '';
 
+  // DŮLEŽITÉ:
+  // archived objednávky se NEZOBRAZÍ v kuchyni,
+  // ale v app.orders zůstávají a přehled prodeje je dál počítá.
   const visibleOrders = window.app.orders.filter(function(order) {
     return !order.archived;
   });
@@ -273,7 +274,7 @@ function renderOrders() {
     const number = order.orderNumber ? '#' + order.orderNumber : '#?';
 
     const buttonHtml = order.done
-      ? `<button type="button" onclick="deleteOrder('${order.firebaseId}')" class="mt-4 w-full py-3 rounded-xl text-xl font-bold bg-red-600">🗑️ Skrýt z kuchyně</button>`
+      ? `<button type="button" onclick="archiveOrder('${order.firebaseId}')" class="mt-4 w-full py-3 rounded-xl text-xl font-bold bg-red-600">🗑️ Skrýt z kuchyně</button>`
       : `<button type="button" onclick="markDone('${order.firebaseId}')" class="mt-4 w-full py-3 rounded-xl text-xl font-bold bg-green-600">✅ Označit jako hotové</button>`;
 
     div.innerHTML = `
@@ -291,7 +292,10 @@ function renderOrders() {
   });
 }
 
-function calculateSalesStats() {
+function renderSalesStats() {
+  const box = document.getElementById('salesStats');
+  if (!box) return;
+
   const stats = {
     "Párek v rohlíku": { count: 0, total: 0 },
     "Grilovaný hermelín": { count: 0, total: 0 },
@@ -302,6 +306,9 @@ function calculateSalesStats() {
 
   let grandTotal = 0;
 
+  // DŮLEŽITÉ:
+  // Přehled počítá i archived objednávky.
+  // Nepočítá jen objednávky označené deletedFromStats po vynulování přehledu.
   window.app.orders.forEach(function(order) {
     if (order.deletedFromStats) return;
 
@@ -315,16 +322,6 @@ function calculateSalesStats() {
       grandTotal += Number(item.price || 0);
     });
   });
-
-  return { stats: stats, grandTotal: grandTotal };
-}
-
-function renderSalesStats() {
-  const box = document.getElementById('salesStats');
-  if (!box) return;
-
-  const data = calculateSalesStats();
-  const stats = data.stats;
 
   let html = '';
 
@@ -340,33 +337,14 @@ function renderSalesStats() {
   html += `
     <div class="flex justify-between pt-3 text-2xl">
       <span class="font-bold">Celkem</span>
-      <strong>${data.grandTotal} Kč</strong>
+      <strong>${grandTotal} Kč</strong>
     </div>
   `;
 
   box.innerHTML = html;
 }
 
-function resetSalesStats() {
-  if (!confirm('Opravdu vynulovat přehled prodeje? Objednávky v kuchyni zůstanou, ale přehled začne od nuly.')) {
-    return;
-  }
-
-  if (!window.app.dbReady || !window.firebaseClearSalesStats) {
-    alert('Firebase ještě není načtený. Zkus to prosím za pár sekund.');
-    return;
-  }
-
-  window.firebaseClearSalesStats()
-    .then(function() {
-      alert('Přehled prodeje byl vynulován.');
-    })
-    .catch(function(error) {
-      alert('Chyba při nulování: ' + error.message);
-    });
-}
-
-window.sendOrder = async function() {
+async function sendOrder() {
   if (window.app.currentItems.length === 0) {
     alert('Přidej alespoň jednu položku');
     return;
@@ -392,6 +370,8 @@ window.sendOrder = async function() {
       note: document.getElementById('poznamka').value,
       total: total,
       done: false,
+      archived: false,
+      deletedFromStats: false,
       createdAt: Date.now()
     };
 
@@ -412,7 +392,7 @@ window.sendOrder = async function() {
   }
 }
 
-window.markDone = function(id) {
+function markDone(id) {
   if (window.app.dbReady && window.firebaseMarkDone) {
     window.firebaseMarkDone(id).catch(function(error) {
       alert('Chyba: ' + error.message);
@@ -420,15 +400,17 @@ window.markDone = function(id) {
   }
 }
 
-window.deleteOrder = function(id) {
-  if (confirm('Opravdu smazat objednávku?') && window.app.dbReady && window.firebaseDeleteOrder) {
-    window.firebaseDeleteOrder(id).catch(function(error) {
-      alert('Chyba: ' + error.message);
-    });
+function archiveOrder(id) {
+  if (confirm('Skrýt objednávku z kuchyně? V přehledu prodeje zůstane započítaná.')) {
+    if (window.app.dbReady && window.firebaseArchiveOrder) {
+      window.firebaseArchiveOrder(id).catch(function(error) {
+        alert('Chyba: ' + error.message);
+      });
+    }
   }
 }
 
-window.resetOrderNumbers = function() {
+function resetOrderNumbers() {
   if (!window.app.dbReady || !window.firebaseResetCounter) {
     alert('Firebase ještě není načtený. Zkus to prosím za pár sekund.');
     return;
@@ -445,10 +427,29 @@ window.resetOrderNumbers = function() {
   }
 }
 
+function resetSalesStats() {
+  if (!confirm('Opravdu vynulovat přehled prodeje? Objednávky v kuchyni zůstanou, ale přehled začne od nuly.')) {
+    return;
+  }
+
+  if (!window.app.dbReady || !window.firebaseClearSalesStats) {
+    alert('Firebase ještě není načtený. Zkus to prosím za pár sekund.');
+    return;
+  }
+
+  window.firebaseClearSalesStats()
+    .then(function() {
+      alert('Přehled prodeje byl vynulován.');
+    })
+    .catch(function(error) {
+      alert('Chyba při nulování: ' + error.message);
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   renderCurrentOrder();
   renderOrders();
-      calculateSalesStats();
+  renderSalesStats();
 
   const savedMode = localStorage.getItem('gastro_mode');
   if (savedMode) {
@@ -465,7 +466,6 @@ document.addEventListener('DOMContentLoaded', function() {
     addDoc,
     onSnapshot,
     updateDoc,
-    deleteDoc,
     doc,
     runTransaction,
     setDoc
@@ -511,6 +511,9 @@ document.addEventListener('DOMContentLoaded', function() {
       return updateDoc(doc(db, 'orders', id), { done: true });
     };
 
+    // TADY JE HLAVNÍ OPRAVA:
+    // Objednávka se nemaže. Jen se skryje z kuchyně.
+    // V přehledu prodeje zůstává, protože renderSalesStats počítá i archived objednávky.
     window.firebaseArchiveOrder = function(id) {
       return updateDoc(doc(db, 'orders', id), {
         archived: true,
@@ -552,7 +555,6 @@ document.addEventListener('DOMContentLoaded', function() {
       });
 
       renderOrders();
-      calculateSalesStats();
       renderSalesStats();
     }, function(error) {
       console.error(error);
