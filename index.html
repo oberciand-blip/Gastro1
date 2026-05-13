@@ -1,14 +1,14 @@
-<!DOCTYPE html>
+from pathlib import Path
+
+html = """<!DOCTYPE html>
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gastro objednávky</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-
 <body class="bg-gray-100 min-h-screen">
-
 <div id="modeOverlay" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-6">
   <div class="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl">
     <h1 class="text-4xl font-bold mb-6">🍔 Gastro systém</h1>
@@ -83,8 +83,195 @@
         </div>
 
         <div class="bg-white border rounded-2xl p-4">
-          <h2 class="text-2xl font-bold mb-4">🛒 Aktuální objednávka</h2>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-2xl font-bold">🛒 Aktuální objednávka</h2>
+
+            <button type="button"
+              onclick="resetOrderNumbers()"
+              class="bg-red-600 text-white px-4 py-2 rounded-xl font-bold">
+              🔄 Reset čísel
+            </button>
+          </div>
+
           <div id="currentOrder" class="space-y-3"></div>
         </div>
 
       </div>
+
+      <div class="mt-6">
+        <label class="font-semibold">Poznámka</label>
+        <textarea id="poznamka" class="w-full mt-2 p-3 rounded-xl border text-xl" rows="3"></textarea>
+      </div>
+
+      <button type="button" onclick="sendOrder()" class="w-full mt-6 bg-green-600 hover:bg-green-700 text-white text-2xl font-bold py-4 rounded-2xl">
+        ➕ Odeslat objednávku
+      </button>
+    </div>
+
+    <div id="kitchenPanel" class="bg-black text-white rounded-3xl shadow-xl p-6 flex-1 min-h-screen hidden">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
+        <h2 class="text-3xl font-bold">👨‍🍳 Kuchyň</h2>
+
+        <button type="button"
+          onclick="setMode('staff')"
+          class="bg-white text-black px-4 py-3 rounded-2xl font-bold">
+          🧾 Obsluha
+        </button>
+      </div>
+
+      <div id="orders" class="space-y-4"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let currentItems = [];
+let orderCounter = 0;
+
+function setMode(mode) {
+  localStorage.setItem('gastro_mode', mode);
+
+  document.getElementById('modeOverlay').remove();
+
+  const staffPanel = document.getElementById('staffPanel');
+  const kitchenPanel = document.getElementById('kitchenPanel');
+
+  staffPanel.classList.add('hidden');
+  kitchenPanel.classList.add('hidden');
+
+  if(mode === 'staff'){
+    staffPanel.classList.remove('hidden');
+  } else {
+    kitchenPanel.classList.remove('hidden');
+  }
+}
+
+function addItem(name, price, hasSauce){
+  currentItems.push({
+    id: Date.now(),
+    name,
+    price,
+    sauce: hasSauce ? 'kečup' : ''
+  });
+
+  renderCurrentOrder();
+}
+
+function removeItem(id){
+  currentItems = currentItems.filter(item => item.id !== id);
+  renderCurrentOrder();
+}
+
+function updateSauce(id, value){
+  currentItems = currentItems.map(item => {
+    if(item.id === id){
+      item.sauce = value;
+    }
+    return item;
+  });
+
+  renderCurrentOrder();
+}
+
+function renderCurrentOrder(){
+  const container = document.getElementById('currentOrder');
+  const totalPrice = document.getElementById('totalPrice');
+
+  container.innerHTML = '';
+
+  let total = 0;
+
+  currentItems.forEach(item => {
+    total += item.price;
+
+    const div = document.createElement('div');
+    div.className = 'bg-gray-100 rounded-2xl p-3';
+
+    div.innerHTML = `
+      <div class="flex justify-between items-center gap-3">
+        <div>
+          <div class="font-bold text-xl">${item.name}</div>
+          <div>${item.price} Kč</div>
+        </div>
+
+        ${item.sauce !== '' ? `
+        <select onchange="updateSauce(${item.id}, this.value)" class="p-2 rounded-xl border">
+          <option ${item.sauce === 'kečup' ? 'selected' : ''}>kečup</option>
+          <option ${item.sauce === 'hořčice' ? 'selected' : ''}>hořčice</option>
+          <option ${item.sauce === 'oboje' ? 'selected' : ''}>oboje</option>
+        </select>` : ''}
+
+        <button onclick="removeItem(${item.id})"
+          class="bg-red-500 text-white px-4 py-2 rounded-xl">
+          ✕
+        </button>
+      </div>
+    `;
+
+    container.appendChild(div);
+  });
+
+  totalPrice.innerText = total + ' Kč';
+}
+
+function sendOrder(){
+  if(currentItems.length === 0){
+    alert('Přidej položku');
+    return;
+  }
+
+  orderCounter++;
+
+  const container = document.getElementById('orders');
+
+  const total = currentItems.reduce((sum,item)=>sum+item.price,0);
+
+  const div = document.createElement('div');
+  div.className = 'rounded-2xl p-4 bg-gray-800';
+
+  div.innerHTML = `
+    <div class="flex justify-between items-center mb-3">
+      <div class="text-3xl font-bold">Objednávka #${orderCounter}</div>
+      <div class="text-yellow-300 text-3xl font-bold">${total} Kč</div>
+    </div>
+
+    <div class="space-y-2 text-2xl">
+      ${currentItems.map(item => `
+        <div>• ${item.name} ${item.sauce ? '('+item.sauce+')' : ''}</div>
+      `).join('')}
+    </div>
+
+    <button onclick="this.parentElement.remove()"
+      class="mt-4 w-full py-3 rounded-xl text-xl font-bold bg-green-600">
+      ✅ Hotovo
+    </button>
+  `;
+
+  container.prepend(div);
+
+  currentItems = [];
+  renderCurrentOrder();
+  document.getElementById('poznamka').value = '';
+}
+
+function resetOrderNumbers(){
+  orderCounter = 0;
+  alert('Čísla objednávek resetována');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const savedMode = localStorage.getItem('gastro_mode');
+  if(savedMode){
+    setMode(savedMode);
+  }
+});
+</script>
+
+</body>
+</html>
+"""
+
+path = Path("/mnt/data/gastro-upraveny.html")
+path.write_text(html, encoding="utf-8")
+print("done")
