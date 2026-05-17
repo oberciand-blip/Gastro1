@@ -111,7 +111,7 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}th,td{b
 
 <div class="popup-backdrop" id="shotModal"><div class="popup"><h2 style="margin-top:0;text-align:center;font-size:32px">🥃 Panáky</h2><div id="shotGrid" class="popup-grid"></div><button class="big-btn ghost" style="width:100%;margin-top:16px" data-close="shotModal">ZAVŘÍT</button></div></div>
 
-<div class="popup-backdrop" id="paymentModal"><div class="payment-modal"><h2>Způsob platby</h2><div class="payment-buttons"><button class="primary" id="payCashBtn" type="button" onclick="choosePaymentSafe('cash')">HOTOVĚ</button><button class="blue" id="payQrBtn" type="button" onclick="showQrPreview(window.lastPendingAmount || getCurrentPaymentAmount())">QR</button></div><button class="big-btn ghost" style="width:100%;margin-top:14px" data-close="paymentModal">ZPĚT</button></div></div>
+<div class="popup-backdrop" id="paymentModal"><div class="payment-modal"><h2>Způsob platby</h2><div class="payment-buttons"><button class="primary" id="payCashBtn" type="button" onclick="choosePaymentSafe('cash')">HOTOVĚ</button><button class="blue" id="payQrBtn" type="button" onclick="choosePaymentSafe('qr')">QR</button></div><button class="big-btn ghost" style="width:100%;margin-top:14px" data-close="paymentModal">ZPĚT</button></div></div>
 
 
 <div class="popup-backdrop" id="qrPreviewModal">
@@ -137,9 +137,6 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}th,td{b
 
 
 <script type="module">
-  // 🔥 FIREBASE NASTAVENÍ
-  // Doplň sem svůj Firebase config z Firebase Console → Project settings → Your apps → Web app.
-  // Project ID máš podle předchozího nastavení: gastro1-c61d5
   const firebaseConfig = {
     apiKey: "AIzaSyBVG375wTkQkp7bfuQ7yXFdKniFEQ04aAI",
     authDomain: "gastro1-c61d5.firebaseapp.com",
@@ -153,6 +150,7 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}th,td{b
   import {
     getFirestore,
     doc,
+    getDoc,
     setDoc,
     onSnapshot,
     serverTimestamp
@@ -160,22 +158,10 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}th,td{b
 
   window.FIREBASE_READY = false;
   window.FIREBASE_ERROR = null;
-  window.FIREBASE_REMOTE_LOADING = true;
 
   try {
-    if (
-      firebaseConfig.apiKey.includes("DOPLNIT") ||
-      firebaseConfig.messagingSenderId.includes("DOPLNIT") ||
-      firebaseConfig.appId.includes("DOPLNIT")
-    ) {
-      throw new Error("Firebase config není doplněný. Doplň apiKey, messagingSenderId a appId.");
-    }
-
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-
-    // Jeden společný dokument pro celou akci.
-    // Když budeš chtít novou akci, stačí změnit název dokumentu např. streetball_2026.
     const stateRef = doc(db, "pos_system", "main_state");
 
     window.firebaseSaveState = async function(state) {
@@ -186,21 +172,20 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}th,td{b
       }, { merge: true });
     };
 
-    window.firebaseStartSync = function(onRemoteState) {
-      onSnapshot(stateRef, (snap) => {
-        window.FIREBASE_REMOTE_LOADING = false;
+    window.firebaseStartSync = async function(onRemoteState) {
+      const firstSnap = await getDoc(stateRef);
 
-        if (!snap.exists()) {
-          window.FIREBASE_READY = true;
-          window.firebaseSaveState(window.getPOSStateForFirebase());
-          return;
-        }
-
+      if (!firstSnap.exists()) {
         window.FIREBASE_READY = true;
-        const data = snap.data();
-        onRemoteState(data);
+        if (window.getPOSStateForFirebase) {
+          await window.firebaseSaveState(window.getPOSStateForFirebase());
+        }
+      }
+
+      onSnapshot(stateRef, (snap) => {
+        window.FIREBASE_READY = true;
+        if (snap.exists()) onRemoteState(snap.data());
       }, (error) => {
-        window.FIREBASE_REMOTE_LOADING = false;
         window.FIREBASE_ERROR = error.message;
         console.error("Firebase sync error:", error);
       });
@@ -208,7 +193,6 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}th,td{b
 
     window.FIREBASE_READY = true;
   } catch (error) {
-    window.FIREBASE_REMOTE_LOADING = false;
     window.FIREBASE_ERROR = error.message;
     console.warn("Firebase není aktivní:", error.message);
   }
@@ -244,6 +228,8 @@ let activeTicketId=null;
 let activeTicketGroupId=null;
 let salesUnlocked=false;
 let pendingPayment=null;
+let isApplyingRemoteState=false;
+let firebaseSyncStarted=false;
 
 function byId(id){return document.getElementById(id)}
 function money(v){return v+" Kč"}
@@ -251,35 +237,7 @@ function esc(t){return String(t||"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&
 function nowText(d){return new Date(d).toLocaleString("cs-CZ")}
 function productById(id){return customProducts[id]||PRODUCTS.find(p=>p.id===id)}
 function getPOSStateForFirebase(){
-  return {
-    activeOrders,
-    kitchenOrders,
-    tickets,
-    sales,
-    nextFoodNumber
-  };
-}
-
-function applyPOSStateFromFirebase(data){
-  if(!data) return;
-
-  isApplyingRemoteState = true;
-
-  activeOrders = Array.isArray(data.activeOrders) ? data.activeOrders : [];
-  kitchenOrders = Array.isArray(data.kitchenOrders) ? data.kitchenOrders : [];
-  tickets = Array.isArray(data.tickets) ? data.tickets : [];
-  sales = Array.isArray(data.sales) ? data.sales : [];
-  nextFoodNumber = Number(data.nextFoodNumber || 1);
-
-  // Pokud na tomto zařízení byl otevřený lístek, ale už ve Firebase neexistuje, zavře se.
-  if(activeTicketId && !tickets.some(t=>t.id===activeTicketId)){
-    activeTicketId = null;
-  }
-
-  saveLocalOnly();
-  renderAll();
-
-  isApplyingRemoteState = false;
+  return { activeOrders, kitchenOrders, tickets, sales, nextFoodNumber };
 }
 
 function saveLocalOnly(){
@@ -290,9 +248,27 @@ function saveLocalOnly(){
   localStorage.setItem("pos_clean_nextFoodNumber",String(nextFoodNumber));
 }
 
+function applyPOSStateFromFirebase(data){
+  if(!data) return;
+  isApplyingRemoteState = true;
+
+  activeOrders = Array.isArray(data.activeOrders) ? data.activeOrders : [];
+  kitchenOrders = Array.isArray(data.kitchenOrders) ? data.kitchenOrders : [];
+  tickets = Array.isArray(data.tickets) ? data.tickets : [];
+  sales = Array.isArray(data.sales) ? data.sales : [];
+  nextFoodNumber = Number(data.nextFoodNumber || 1);
+
+  if(activeTicketId && !tickets.some(t=>t.id===activeTicketId)){
+    activeTicketId = null;
+  }
+
+  saveLocalOnly();
+  renderAll();
+  isApplyingRemoteState = false;
+}
+
 function save(){
   saveLocalOnly();
-
   if(window.firebaseSaveState && !isApplyingRemoteState){
     window.firebaseSaveState(getPOSStateForFirebase()).catch(err=>{
       console.warn("Firebase save failed:", err);
@@ -713,21 +689,6 @@ function clearCartSafe(){
   flash("Košík vymazán");
 }
 
-
-let qrPendingAmount = 0;
-
-function showQrPreview(amount){
-  qrPendingAmount = amount || 0;
-  byId("qrAmountPreview").textContent = money(qrPendingAmount);
-  showModal("qrPreviewModal");
-}
-
-function confirmQrPayment(){
-  closeModal("qrPreviewModal");
-  choosePaymentSafe("qr");
-}
-
-
 function choosePaymentSafe(method){
   closeModal("paymentModal");
   if(typeof pendingPayment === "function"){
@@ -737,17 +698,6 @@ function choosePaymentSafe(method){
   }else{
     alert("Není rozpracovaná žádná platba.");
   }
-}
-
-
-
-function getCurrentPaymentAmount(){
-  if(activeTicketId){
-    const ticket = tickets.find(t=>t.id===activeTicketId);
-    return ticket ? ticket.total : 0;
-  }
-
-  return cartTotal();
 }
 
 
@@ -849,33 +799,27 @@ document.querySelectorAll("[data-close]").forEach(function(b){
 function updateSyncStatus(){
   const el = byId("syncStatus");
   if(!el) return;
-
   if(window.FIREBASE_ERROR){
     el.textContent = "• Firebase chyba";
     el.style.color = "#fca5a5";
-    return;
-  }
-
-  if(window.FIREBASE_READY){
+  }else if(window.FIREBASE_READY){
     el.textContent = "• online sync";
     el.style.color = "#86efac";
-    return;
+  }else{
+    el.textContent = "• lokálně";
+    el.style.color = "#d1d5db";
   }
-
-  el.textContent = "• lokálně";
-  el.style.color = "#d1d5db";
 }
 
 function startFirebaseSyncIfReady(){
   if(firebaseSyncStarted) return;
-
   if(window.firebaseStartSync){
     firebaseSyncStarted = true;
-    window.firebaseStartSync(applyPOSStateFromFirebase);
-    updateSyncStatus();
-    return;
+    window.firebaseStartSync(applyPOSStateFromFirebase).catch(err=>{
+      window.FIREBASE_ERROR = err.message;
+      updateSyncStatus();
+    });
   }
-
   updateSyncStatus();
 }
 
