@@ -72,6 +72,27 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}th,td{b
 .tap-btn{background:#1e3a8a}.drink-btn{background:#2563eb}.candy-btn{background:#9333ea}.shot-item{background:#f3f4f6;border-radius:18px;padding:12px}.shot-name{font-size:20px;font-weight:900;margin-bottom:10px;text-align:center}.shot-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}.shot-buttons button{min-height:64px;border-radius:14px;font-size:22px}
 .payment-modal{background:white;border-radius:24px;width:min(92vw,460px);padding:22px;box-shadow:0 20px 40px rgba(0,0,0,.3)}
 .payment-modal h2{margin:0 0 16px;text-align:center;font-size:30px}.payment-buttons{display:grid;grid-template-columns:1fr 1fr;gap:12px}.payment-buttons button{min-height:86px;border-radius:20px;font-size:26px}
+
+.ticket-tile-status{
+  font-size:12px;
+  font-weight:900;
+  color:#6b7280;
+  margin-top:2px;
+}
+.ticket-tile.active .ticket-tile-status{
+  color:#1e40af;
+}
+.ticket-tile.active{
+  background:#dbeafe!important;
+  border-color:#2563eb!important;
+  box-shadow:0 0 0 3px rgba(37,99,235,.15);
+}
+.ticket-tile .tile-actions{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:6px;
+}
+
 </style>
 </head>
 <body>
@@ -467,11 +488,6 @@ renderAll()
 }
 
 function selectActiveTicket(id){
-const idx=tickets.findIndex(t=>t.id===id);
-if(idx>-1){
-  const selected=tickets.splice(idx,1)[0];
-  tickets.unshift(selected);
-}
 activeTicketId=id;
 activeTicketGroupId=null;
 save();
@@ -662,7 +678,27 @@ byId("activeTicketBannerFood").innerHTML=html;
 byId("activeTicketBannerDrinks").innerHTML=html;
 }
 
-function renderQuickTickets(){const html=tickets.length?'<div class="ticket-grid">'+tickets.map(t=>`<div class="ticket-tile ${t.id===activeTicketId?'active':''}" data-select-ticket="${t.id}"><div><div class="ticket-tile-name">${esc(t.note)}</div><div class="ticket-tile-total">${money(t.total)}</div></div><button class="primary" type="button">${t.id===activeTicketId?'AKTIVNÍ':'OTEVŘÍT'}</button></div>`).join("")+'</div>':'<div class="empty">Žádné lístky</div>';byId("quickTicketsFood").innerHTML=html;byId("quickTicketsDrinks").innerHTML=html}
+function renderQuickTickets(){
+const html=tickets.length?'<div class="ticket-grid">'+tickets.map(t=>{
+  const isActive = t.id===activeTicketId;
+  return `<div class="ticket-tile ${isActive?'active':''}">
+    <div>
+      <div class="ticket-tile-name">${esc(t.note)}</div>
+      <div class="ticket-tile-total">${money(t.total)}</div>
+      <div class="ticket-tile-status">${isActive?'AKTIVNÍ LÍSTEK':'NEAKTIVNÍ'}</div>
+    </div>
+    <div class="tile-actions">
+      ${isActive
+        ? `<button class="ghost" type="button" onclick="clearActiveTicket()">ZAVŘÍT</button>`
+        : `<button class="primary" type="button" data-select-ticket="${t.id}">OTEVŘÍT</button>`
+      }
+    </div>
+  </div>`;
+}).join("")+'</div>':'<div class="empty">Žádné lístky</div>';
+byId("quickTicketsFood").innerHTML=html;
+byId("quickTicketsDrinks").innerHTML=html;
+}
+
 function renderActiveOrders(){const html=activeOrders.length?activeOrders.map(o=>`<div class="order-card"><div class="card-head"><span>${o.foodNumber?`<span class="food-number">#${o.foodNumber}</span>`:'Bez čísla'}</span><span>${money(o.total)}</span></div><div class="small">${nowText(o.createdAt)} • zaplaceno</div><ul>${o.items.map(i=>`<li>${i.qty}× ${esc(i.name)} – ${money(i.total)}</li>`).join("")}</ul><div class="row-actions"><button class="yellow" data-order-done="${o.id}">HOTOVO</button><button class="danger" data-order-mistake="${o.id}">OMYL</button></div></div>`).join(""):'<div class="empty">Žádné objednávky</div>';byId("activeOrdersFood").innerHTML=html;byId("activeOrdersDrinks").innerHTML=html}
 function renderKitchen(){if(!kitchenOrders.length){byId("kitchenOrders").innerHTML='<div class="empty">Kuchyň nemá žádné objednávky</div>';return}byId("kitchenOrders").innerHTML='<div class="kitchen-grid">'+kitchenOrders.map(o=>`<div class="kitchen-card"><div class="card-head"><span>${o.foodNumber?`<span class="food-number">#${o.foodNumber}</span>`:esc(o.note||"Jídlo")}</span><span>${esc(o.note||"")}</span></div><div class="small">${nowText(o.createdAt)}</div><ul>${o.items.map(i=>`<li>${i.qty}× ${esc(i.name)}</li>`).join("")}</ul><button class="big-btn primary" style="width:100%" data-kitchen-done="${o.id}">HOTOVO</button></div>`).join("")+'</div>'}
 function renderTicketsFull(){byId("ticketsList").innerHTML=tickets.length?tickets.map(t=>`<div class="ticket-card ${t.id===activeTicketId?'active':''}"><div class="card-head"><span>${esc(t.note)}</span><span>${money(t.total)}</span></div><div class="small">Nezaplaceno</div>${activeTicketItemsHtml(t)}<div class="row-actions" style="grid-template-columns:1fr 1fr; margin-top:10px;">
