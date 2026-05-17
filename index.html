@@ -93,6 +93,57 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}th,td{b
   gap:6px;
 }
 
+
+.ticket-history{
+  background:white;
+  border-radius:14px;
+  padding:8px 10px;
+  margin:8px 0 10px;
+  text-align:left;
+  font-size:15px;
+  color:#111827;
+}
+.ticket-history-group{
+  display:block!important;
+  border-bottom:3px solid #cbd5e1!important;
+  padding:8px 0!important;
+}
+.ticket-history-group:last-child{border-bottom:0!important;}
+.ticket-history-title{
+  font-weight:900;
+  color:#1e40af;
+  margin-bottom:4px;
+}
+.ticket-history-row{
+  display:flex!important;
+  justify-content:space-between;
+  gap:8px;
+  border-bottom:1px solid #e5e7eb!important;
+  padding:4px 0!important;
+}
+
+
+.popup-grid button,
+.shot-buttons button{
+  position:relative;
+}
+.popup-count{
+  position:absolute;
+  top:8px;
+  right:8px;
+  min-width:34px;
+  height:34px;
+  border-radius:999px;
+  background:rgba(0,0,0,.35);
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  font-weight:900;
+  padding:0 8px;
+}
+
 </style>
 </head>
 <body>
@@ -132,7 +183,7 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}th,td{b
 
 <div class="popup-backdrop" id="shotModal"><div class="popup"><h2 style="margin-top:0;text-align:center;font-size:32px">🥃 Panáky</h2><div id="shotGrid" class="popup-grid"></div><button class="big-btn ghost" style="width:100%;margin-top:16px" data-close="shotModal">ZAVŘÍT</button></div></div>
 
-<div class="popup-backdrop" id="paymentModal"><div class="payment-modal"><h2>Způsob platby</h2><div class="payment-buttons"><button class="primary" id="payCashBtn" type="button" onclick="choosePaymentSafe('cash')">HOTOVĚ</button><button class="blue" id="payQrBtn" type="button" onclick="choosePaymentSafe('qr')">QR</button></div><button class="big-btn ghost" style="width:100%;margin-top:14px" data-close="paymentModal">ZPĚT</button></div></div>
+<div class="popup-backdrop" id="paymentModal"><div class="payment-modal"><h2>Způsob platby</h2><div class="payment-buttons"><button class="primary" id="payCashBtn" type="button" onclick="choosePaymentSafe(\'cash\')">HOTOVĚ</button><button class="blue" id="payQrBtn" type="button" onclick="showQrPreview(window.lastPendingAmount || getCurrentPaymentAmount())">QR</button></div><button class="big-btn ghost" style="width:100%;margin-top:14px" data-close="paymentModal">ZPĚT</button></div></div>
 
 
 <div class="popup-backdrop" id="qrPreviewModal">
@@ -246,6 +297,7 @@ let tickets=JSON.parse(localStorage.getItem("pos_clean_tickets")||"[]");
 let sales=JSON.parse(localStorage.getItem("pos_clean_sales")||"[]");
 let nextFoodNumber=Number(localStorage.getItem("pos_clean_nextFoodNumber")||"1");
 let activeTicketId=null;
+let activeTicketHistorySessionId=null;
 let activeTicketGroupId=null;
 let salesUnlocked=false;
 let pendingPayment=null;
@@ -355,6 +407,7 @@ function rebuildTicketFromGroups(ticket){
   });
 
   ticket.total=ticket.items.reduce((s,i)=>s+i.total,0);
+  addToTicketHistory(ticket,item);
 }
 
 function addItemToTicketGroup(ticket,item){
@@ -489,13 +542,14 @@ renderAll()
 
 function selectActiveTicket(id){
 activeTicketId=id;
+activeTicketHistorySessionId=null;
 activeTicketGroupId=null;
 save();
 renderAll();
 flash("Lístek otevřen");
 }
 
-function clearActiveTicket(){activeTicketId=null;activeTicketGroupId=null;renderAll();flash("Lístek zavřen")}
+function clearActiveTicket(){activeTicketId=null;activeTicketHistorySessionId=null;renderAll();flash("Lístek zavřen")}
 function createTicket(){
 const name=prompt("Zadej jméno pro lístek:");
 if(!name||!name.trim()){
@@ -532,7 +586,7 @@ renderAll();
 flash("Lístek vytvořen");
 }
 
-function createPaidOrder(){const items=cartItems();if(!items.length){alert("Nejdřív vyber položky.");return}window.lastPendingAmount=cartTotal(); pendingPayment=method=>finishPaidOrder(method);showModal("paymentModal")}
+function createPaidOrder(){const items=cartItems();if(!items.length){alert("Nejdřív vyber položky.");return}window.lastPendingAmount=cartTotal(); window.lastPendingAmount=cartTotal(); pendingPayment=method=>finishPaidOrder(method);showModal("paymentModal")}
 function finishPaidOrder(method){
 const items=cartItems();
 if(!items.length)return;
@@ -563,7 +617,7 @@ renderAll();
 flash(foodNumber ? "Objednávka jídla #"+foodNumber : "Objednávka zaplacena");
 }
 
-function payTicket(id){const t=tickets.find(x=>x.id===id);if(!t)return;rebuildTicketFromGroups(t);if(!t.items.length){alert("Lístek je prázdný.");return}window.lastPendingAmount=t.total; pendingPayment=method=>{t.paid=true;sales.push({...t,paymentMethod:method,paidAt:new Date().toISOString()});tickets=tickets.filter(x=>x.id!==id);if(activeTicketId===id){activeTicketId=null;activeTicketGroupId=null;}save();renderAll();flash("Lístek zaplacen")};showModal("paymentModal")}
+function payTicket(id){const t=tickets.find(x=>x.id===id);if(!t)return;rebuildTicketFromGroups(t);if(!t.items.length){alert("Lístek je prázdný.");return}window.lastPendingAmount=t.total; window.lastPendingAmount=t.total; pendingPayment=method=>{t.paid=true;sales.push({...t,paymentMethod:method,paidAt:new Date().toISOString()});tickets=tickets.filter(x=>x.id!==id);if(activeTicketId===id){activeTicketId=null;activeTicketGroupId=null;}save();renderAll();flash("Lístek zaplacen")};showModal("paymentModal")}
 function deleteTicket(id){if(!confirm("Smazat lístek?"))return;tickets=tickets.filter(t=>t.id!==id);kitchenOrders=kitchenOrders.filter(k=>k.parentId!==id);if(activeTicketId===id){activeTicketId=null;activeTicketGroupId=null;}save();renderAll()}
 function markOrderDone(id){activeOrders=activeOrders.filter(o=>o.id!==id);save();renderAll()}
 function deleteOrderMistake(id){if(!confirm("Smazat objednávku jako omyl?"))return;activeOrders=activeOrders.filter(o=>o.id!==id);sales=sales.filter(s=>s.id!==id);kitchenOrders=kitchenOrders.filter(k=>k.parentId!==id);save();renderAll()}
@@ -643,12 +697,69 @@ function editActiveTicketItem(itemId, delta){
   renderAll();
 }
 
+
+function ensureTicketHistory(ticket){
+  if(!ticket.history) ticket.history=[];
+}
+
+function getCurrentHistoryGroup(ticket){
+  ensureTicketHistory(ticket);
+
+  let group = ticket.history.find(g=>g.id===activeTicketHistorySessionId);
+
+  if(!group){
+    group = {
+      id: Date.now()+Math.floor(Math.random()*10000),
+      createdAt: new Date().toISOString(),
+      items: [],
+      total: 0
+    };
+    ticket.history.unshift(group);
+    activeTicketHistorySessionId = group.id;
+  }
+
+  return group;
+}
+
+function addToTicketHistory(ticket,item){
+  const group = getCurrentHistoryGroup(ticket);
+  const existing = group.items.find(i=>i.id===item.id);
+
+  if(existing){
+    existing.qty += item.qty;
+    existing.total += item.total;
+  }else{
+    group.items.push({...item});
+  }
+
+  group.total = group.items.reduce((s,i)=>s+i.total,0);
+}
+
+function ticketHistoryHtml(ticket){
+  ensureTicketHistory(ticket);
+
+  const groups = ticket.history.filter(g=>g.items && g.items.length);
+
+  if(!groups.length){
+    return '<div class="ticket-history">Historie zatím prázdná</div>';
+  }
+
+  return '<div class="ticket-history">'+groups.map((group,index)=>{
+    const orderNumber = groups.length-index;
+    const rows = group.items.map(i=>`<div class="ticket-history-row"><span>${i.qty}× ${esc(i.name)}</span><strong>${money(i.total)}</strong></div>`).join("");
+    return `<div class="ticket-history-group"><div class="ticket-history-title">Objednávka ${orderNumber}</div>${rows}<div style="text-align:right;font-weight:900;margin-top:4px;">${money(group.total||0)}</div></div>`;
+  }).join("")+'</div>';
+}
+
+
 function activeTicketItemsHtml(t){
   if(!t || !t.items || !t.items.length){
     return '<div class="active-ticket-items">Zatím bez položek</div>';
   }
 
-  return '<div class="active-ticket-items">'+t.items.map(i=>{
+  const history = ticketHistoryHtml(t);
+
+  const editList = '<div class="active-ticket-items"><div style="font-weight:900;color:#111827;margin-bottom:6px;">Celkem na lístku / úprava položek</div>'+t.items.map(i=>{
     const safeId = JSON.stringify(i.id);
     return `
       <div style="display:block;border-bottom:1px solid #e5e7eb;padding:8px 0;">
@@ -656,13 +767,16 @@ function activeTicketItemsHtml(t){
           <span>${i.qty}× ${esc(i.name)}</span>
           <strong>${money(i.total)}</strong>
         </div>
+        ${typeof editActiveTicketItem === "function" ? `
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
           <button class="ghost" style="min-height:44px;border-radius:12px;font-size:14px;" type="button" onclick='editActiveTicketItem(${safeId}, -1)'>ODEBRAT 1</button>
           <button class="blue" style="min-height:44px;border-radius:12px;font-size:14px;" type="button" onclick='editActiveTicketItem(${safeId}, 1)'>PŘIDAT 1</button>
-        </div>
+        </div>` : ""}
       </div>
     `;
   }).join("")+'</div>';
+
+  return history + editList;
 }
 
 function renderActiveBanner(){
@@ -716,7 +830,50 @@ function downloadCSV(){if(!salesUnlocked){alert("Nejdřív zadej heslo.");return
 function resetAll(){if(!salesUnlocked){alert("Nejdřív zadej heslo.");return}if(!confirm("Opravdu vynulovat vše?"))return;cart={};customProducts={};activeOrders=[];kitchenOrders=[];tickets=[];sales=[];nextFoodNumber=1;activeTicketId=null;activeTicketGroupId=null;save();renderAll();flash("Vše resetováno")}
 function updateModeButtons(){const inTicket=!!activeTicketId;["actionsFood","actionsDrinks"].forEach(id=>byId(id).style.display=inTicket?"none":"grid");byId("cartLabelFood").textContent=inTicket?"Lístek":"Celkem";byId("cartLabelDrinks").textContent=inTicket?"Lístek":"Celkem"}
 
-function renderAll(){renderProducts("foodProducts",["food"]);renderProducts("drinkProducts",["drink","sweets"]);renderCart("cartListFood");renderCart("cartListDrinks");const t=tickets.find(x=>x.id===activeTicketId);const total=money(t?t.total:cartTotal());byId("cartTotalFood").textContent=total;byId("cartTotalDrinks").textContent=total;renderActiveBanner();renderQuickTickets();renderActiveOrders();renderKitchen();renderTicketsFull();renderSales();updateModeButtons();bindDynamic()}
+
+function getSelectedQtyForId(id){
+  if(activeTicketId){
+    const ticket = tickets.find(t=>t.id===activeTicketId);
+    if(!ticket || !ticket.items) return 0;
+    const item = ticket.items.find(i=>i.id===id);
+    return item ? item.qty : 0;
+  }
+
+  return cart[id] || 0;
+}
+
+function updatePopupCounts(){
+  document.querySelectorAll(".popup-count").forEach(el=>el.remove());
+
+  document.querySelectorAll("[data-simple]").forEach(btn=>{
+    try{
+      const item = JSON.parse(btn.dataset.simple);
+      const qty = getSelectedQtyForId(item.id);
+
+      if(qty > 0){
+        const badge = document.createElement("span");
+        badge.className = "popup-count";
+        badge.textContent = qty;
+        btn.appendChild(badge);
+      }
+    }catch(e){}
+  });
+
+  document.querySelectorAll("[data-shot]").forEach(btn=>{
+    const id = btn.dataset.shot + "_" + btn.dataset.size;
+    const qty = getSelectedQtyForId(id);
+
+    if(qty > 0){
+      const badge = document.createElement("span");
+      badge.className = "popup-count";
+      badge.textContent = qty;
+      btn.appendChild(badge);
+    }
+  });
+}
+
+
+function renderAll(){renderProducts("foodProducts",["food"]);renderProducts("drinkProducts",["drink","sweets"]);renderCart("cartListFood");renderCart("cartListDrinks");const t=tickets.find(x=>x.id===activeTicketId);const total=money(t?t.total:cartTotal());byId("cartTotalFood").textContent=total;byId("cartTotalDrinks").textContent=total;renderActiveBanner();renderQuickTickets();renderActiveOrders();renderKitchen();renderTicketsFull();renderSales();updateModeButtons();bindDynamic();updatePopupCounts()}
 
 
 function clearCartSafe(){
@@ -734,6 +891,45 @@ function choosePaymentSafe(method){
   }else{
     alert("Není rozpracovaná žádná platba.");
   }
+}
+
+
+
+function getCurrentPaymentAmount(){
+  if(window.lastPendingAmount) return window.lastPendingAmount;
+
+  if(activeTicketId){
+    const ticket = tickets.find(t=>t.id===activeTicketId);
+    return ticket ? ticket.total : 0;
+  }
+
+  return cartTotal();
+}
+
+function showQrPreview(amount){
+  const finalAmount = amount || getCurrentPaymentAmount() || 0;
+  const amountEl = byId("qrAmountPreview");
+  if(amountEl) amountEl.textContent = money(finalAmount);
+  closeModal("paymentModal");
+  showModal("qrPreviewModal");
+}
+
+function choosePaymentSafe(method){
+  closeModal("paymentModal");
+
+  if(typeof pendingPayment === "function"){
+    const fn = pendingPayment;
+    pendingPayment = null;
+    window.lastPendingAmount = 0;
+    fn(method);
+  }else{
+    alert("Není rozpracovaná žádná platba.");
+  }
+}
+
+function confirmQrPayment(){
+  closeModal("qrPreviewModal");
+  choosePaymentSafe("qr");
 }
 
 
@@ -869,7 +1065,7 @@ byId("ticketBtnFood").onclick=createTicket;byId("ticketBtnDrinks").onclick=creat
 byId("clearBtnFood").onclick=clearCartSafe;byId("clearBtnDrinks").onclick=clearCartSafe;
 byId("unlockSalesBtn").onclick=unlockSales;byId("lockSalesBtn").onclick=lockSales;byId("csvBtn").onclick=downloadCSV;byId("resetBtn").onclick=resetAll;
 byId("payCashBtn").onclick=()=>choosePaymentSafe("cash");
-byId("payQrBtn").onclick=()=>choosePaymentSafe("qr");
+byId("payQrBtn").onclick=()=>showQrPreview(window.lastPendingAmount || getCurrentPaymentAmount());
 ["parekModal","tapModal","drinkModal","candyModal","shotModal","paymentModal"].forEach(id=>{const el=byId(id);el.addEventListener("click",e=>{if(e.target===el)closeModal(id)})});
 }
 
