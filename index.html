@@ -75,7 +75,7 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}th,td{b
 </style>
 </head>
 <body>
-<header><div class="header-row"><h1>Tablet POS</h1><div class="tabs">
+<header><div class="header-row"><h1>Tablet POS <span id="syncStatus" style="font-size:13px;font-weight:700;color:#d1d5db;">• lokálně</span></h1><div class="tabs">
 <button class="tab-btn active" data-tab="food">🍔 Jídlo</button>
 <button class="tab-btn" data-tab="drinks">🍺 Pití</button>
 <button class="tab-btn" data-tab="kitchen">👨‍🍳 Kuchyň</button>
@@ -135,6 +135,87 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}th,td{b
 <div id="flash" class="flash"></div>
 
 
+
+<script type="module">
+  // 🔥 FIREBASE NASTAVENÍ
+  // Doplň sem svůj Firebase config z Firebase Console → Project settings → Your apps → Web app.
+  // Project ID máš podle předchozího nastavení: gastro1-c61d5
+  const firebaseConfig = {
+    apiKey: "AIzaSyBVG375wTkQkp7bfuQ7yXFdKniFEQ04aAI",
+    authDomain: "gastro1-c61d5.firebaseapp.com",
+    projectId: "gastro1-c61d5",
+    storageBucket: "gastro1-c61d5.firebasestorage.app",
+    messagingSenderId: "460537867842",
+    appId: "1:460537867842:web:81ce374a66ca85dad347db"
+  };
+
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import {
+    getFirestore,
+    doc,
+    setDoc,
+    onSnapshot,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  window.FIREBASE_READY = false;
+  window.FIREBASE_ERROR = null;
+  window.FIREBASE_REMOTE_LOADING = true;
+
+  try {
+    if (
+      firebaseConfig.apiKey.includes("DOPLNIT") ||
+      firebaseConfig.messagingSenderId.includes("DOPLNIT") ||
+      firebaseConfig.appId.includes("DOPLNIT")
+    ) {
+      throw new Error("Firebase config není doplněný. Doplň apiKey, messagingSenderId a appId.");
+    }
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Jeden společný dokument pro celou akci.
+    // Když budeš chtít novou akci, stačí změnit název dokumentu např. streetball_2026.
+    const stateRef = doc(db, "pos_system", "main_state");
+
+    window.firebaseSaveState = async function(state) {
+      if (!window.FIREBASE_READY || window.isApplyingRemoteState) return;
+      await setDoc(stateRef, {
+        ...state,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    };
+
+    window.firebaseStartSync = function(onRemoteState) {
+      onSnapshot(stateRef, (snap) => {
+        window.FIREBASE_REMOTE_LOADING = false;
+
+        if (!snap.exists()) {
+          window.FIREBASE_READY = true;
+          window.firebaseSaveState(window.getPOSStateForFirebase());
+          return;
+        }
+
+        window.FIREBASE_READY = true;
+        const data = snap.data();
+        onRemoteState(data);
+      }, (error) => {
+        window.FIREBASE_REMOTE_LOADING = false;
+        window.FIREBASE_ERROR = error.message;
+        console.error("Firebase sync error:", error);
+      });
+    };
+
+    window.FIREBASE_READY = true;
+  } catch (error) {
+    window.FIREBASE_REMOTE_LOADING = false;
+    window.FIREBASE_ERROR = error.message;
+    console.warn("Firebase není aktivní:", error.message);
+  }
+
+  window.dispatchEvent(new Event("firebase-module-loaded"));
+</script>
+
 <script>
 const PASSWORD="123456";
 const PRODUCTS=[
@@ -169,7 +250,58 @@ function money(v){return v+" Kč"}
 function esc(t){return String(t||"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[ch]))}
 function nowText(d){return new Date(d).toLocaleString("cs-CZ")}
 function productById(id){return customProducts[id]||PRODUCTS.find(p=>p.id===id)}
-function save(){localStorage.setItem("pos_clean_activeOrders",JSON.stringify(activeOrders));localStorage.setItem("pos_clean_kitchenOrders",JSON.stringify(kitchenOrders));localStorage.setItem("pos_clean_tickets",JSON.stringify(tickets));localStorage.setItem("pos_clean_sales",JSON.stringify(sales));localStorage.setItem("pos_clean_nextFoodNumber",String(nextFoodNumber))}
+function getPOSStateForFirebase(){
+  return {
+    activeOrders,
+    kitchenOrders,
+    tickets,
+    sales,
+    nextFoodNumber
+  };
+}
+
+function applyPOSStateFromFirebase(data){
+  if(!data) return;
+
+  isApplyingRemoteState = true;
+
+  activeOrders = Array.isArray(data.activeOrders) ? data.activeOrders : [];
+  kitchenOrders = Array.isArray(data.kitchenOrders) ? data.kitchenOrders : [];
+  tickets = Array.isArray(data.tickets) ? data.tickets : [];
+  sales = Array.isArray(data.sales) ? data.sales : [];
+  nextFoodNumber = Number(data.nextFoodNumber || 1);
+
+  // Pokud na tomto zařízení byl otevřený lístek, ale už ve Firebase neexistuje, zavře se.
+  if(activeTicketId && !tickets.some(t=>t.id===activeTicketId)){
+    activeTicketId = null;
+  }
+
+  saveLocalOnly();
+  renderAll();
+
+  isApplyingRemoteState = false;
+}
+
+function saveLocalOnly(){
+  localStorage.setItem("pos_clean_activeOrders",JSON.stringify(activeOrders));
+  localStorage.setItem("pos_clean_kitchenOrders",JSON.stringify(kitchenOrders));
+  localStorage.setItem("pos_clean_tickets",JSON.stringify(tickets));
+  localStorage.setItem("pos_clean_sales",JSON.stringify(sales));
+  localStorage.setItem("pos_clean_nextFoodNumber",String(nextFoodNumber));
+}
+
+function save(){
+  saveLocalOnly();
+
+  if(window.firebaseSaveState && !isApplyingRemoteState){
+    window.firebaseSaveState(getPOSStateForFirebase()).catch(err=>{
+      console.warn("Firebase save failed:", err);
+      flash("Uloženo jen lokálně");
+    });
+  }
+}
+
+window.getPOSStateForFirebase = getPOSStateForFirebase;
 function flash(text){const el=byId("flash");el.textContent=text;el.style.display="block";clearTimeout(window.flashTimer);window.flashTimer=setTimeout(()=>el.style.display="none",1200)}
 function showModal(id){byId(id).style.display="flex"}
 function closeModal(id){byId(id).style.display="none"}
@@ -713,6 +845,41 @@ document.querySelectorAll("[data-close]").forEach(function(b){
 });
 }
 
+
+function updateSyncStatus(){
+  const el = byId("syncStatus");
+  if(!el) return;
+
+  if(window.FIREBASE_ERROR){
+    el.textContent = "• Firebase chyba";
+    el.style.color = "#fca5a5";
+    return;
+  }
+
+  if(window.FIREBASE_READY){
+    el.textContent = "• online sync";
+    el.style.color = "#86efac";
+    return;
+  }
+
+  el.textContent = "• lokálně";
+  el.style.color = "#d1d5db";
+}
+
+function startFirebaseSyncIfReady(){
+  if(firebaseSyncStarted) return;
+
+  if(window.firebaseStartSync){
+    firebaseSyncStarted = true;
+    window.firebaseStartSync(applyPOSStateFromFirebase);
+    updateSyncStatus();
+    return;
+  }
+
+  updateSyncStatus();
+}
+
+
 function bindStatic(){
 
 
@@ -751,7 +918,18 @@ document.addEventListener("click", function(e){
 }, true);
 
 
-window.addEventListener("DOMContentLoaded",()=>{bindStatic();renderAll()});
+window.addEventListener("DOMContentLoaded",()=>{
+  bindStatic();
+  renderAll();
+  startFirebaseSyncIfReady();
+});
+
+window.addEventListener("firebase-module-loaded", ()=>{
+  startFirebaseSyncIfReady();
+  updateSyncStatus();
+});
+
+setInterval(updateSyncStatus, 2000);
 </script>
 </body>
 </html>
