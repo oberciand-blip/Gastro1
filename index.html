@@ -830,6 +830,34 @@ flash(foodNumber?"Objednávka jídla #"+foodNumber:"Objednávka zaplacena");
 
 function payTicket(id){const t=tickets.find(x=>x.id===id);if(!t)return;rebuildTicketFromGroups(t);if(!t.items.length){alert("Lístek je prázdný.");return}window.lastPendingAmount=t.total; window.lastPendingAmount=t.total; pendingPayment=method=>{t.paid=true;sales.push({...t,paymentMethod:method,paidAt:new Date().toISOString()});tickets=tickets.filter(x=>x.id!==id);if(activeTicketId===id){activeTicketId=null;activeTicketGroupId=null;}save();renderAll();flash("Lístek zaplacen")};showModal("paymentModal")}
 function deleteTicket(id){if(!confirm("Smazat lístek?"))return;tickets=tickets.filter(t=>t.id!==id);kitchenOrders=kitchenOrders.filter(k=>k.parentId!==id);if(activeTicketId===id){activeTicketId=null;activeTicketGroupId=null;}save();renderAll()}
+
+function returnOrderToCart(id){
+  const order = activeOrders.find(o=>Number(o.id)===Number(id) || String(o.id)===String(id));
+  if(!order) return;
+
+  if(!confirm("Vrátit tuto objednávku zpět do košíku pro doplnění?")) return;
+
+  order.items.forEach(item=>{
+    customProducts[item.id] = {
+      id:item.id,
+      name:item.name,
+      price:item.price,
+      category:item.category,
+      type:item.type
+    };
+    cart[item.id] = (cart[item.id] || 0) + item.qty;
+  });
+
+  activeOrders = activeOrders.filter(o=>String(o.id)!==String(id));
+  sales = sales.filter(s=>String(s.id)!==String(id));
+  kitchenOrders = kitchenOrders.filter(k=>String(k.parentId)!==String(id));
+
+  save();
+  renderAll();
+  flash("Objednávka vrácena do košíku");
+}
+
+
 function markOrderDone(id){activeOrders=activeOrders.filter(o=>o.id!==id);save();renderAll()}
 function deleteOrderMistake(id){if(!confirm("Smazat objednávku jako omyl?"))return;activeOrders=activeOrders.filter(o=>o.id!==id);sales=sales.filter(s=>s.id!==id);kitchenOrders=kitchenOrders.filter(k=>k.parentId!==id);save();renderAll()}
 function kitchenDone(id){kitchenOrders=kitchenOrders.filter(o=>o.id!==id);save();renderAll()}
@@ -1132,7 +1160,20 @@ byId("quickTicketsFood").innerHTML=html;
 byId("quickTicketsDrinks").innerHTML=html;
 }
 
-function renderActiveOrders(){const html=activeOrders.length?activeOrders.map(o=>`<div class="order-card"><div class="card-head"><span>${o.foodNumber?`<span class="food-number">#${o.foodNumber}</span>`:'Bez čísla'}</span><span>${money(o.total)}</span></div><div class="small">${nowText(o.createdAt)} • zaplaceno</div><ul>${o.items.map(i=>`<li>${i.qty}× ${esc(i.name)} – ${money(i.total)}</li>`).join("")}</ul><div class="row-actions"><button class="yellow" data-order-done="${o.id}">HOTOVO</button><button class="danger" data-order-mistake="${o.id}">OMYL</button></div></div>`).join(""):'<div class="empty">Žádné objednávky</div>';byId("activeOrdersFood").innerHTML=html;byId("activeOrdersDrinks").innerHTML=html}
+function renderActiveOrders(){
+const html=activeOrders.length?activeOrders.map(o=>`<div class="order-card">
+  <div class="card-head"><span>${o.foodNumber?`<span class="food-number">#${o.foodNumber}</span>`:'Bez čísla'}</span><span>${money(o.total)}</span></div>
+  <div class="small">${nowText(o.createdAt)} • zaplaceno</div>
+  <ul>${o.items.map(i=>`<li>${i.qty}× ${esc(i.name)} – ${money(i.total)}</li>`).join("")}</ul>
+  <div class="row-actions" style="grid-template-columns:1fr 1fr 1fr;">
+    <button class="blue" type="button" onclick="returnOrderToCart('${o.id}')">DOPLNIT</button>
+    <button class="yellow" data-order-done="${o.id}">HOTOVO</button>
+    <button class="danger" data-order-mistake="${o.id}">OMYL</button>
+  </div>
+</div>`).join(""):'<div class="empty">Žádné objednávky</div>';
+byId("activeOrdersFood").innerHTML=html;
+byId("activeOrdersDrinks").innerHTML=html;
+}
 function renderKitchen(){if(!kitchenOrders.length){byId("kitchenOrders").innerHTML='<div class="empty">Kuchyň nemá žádné objednávky</div>';return}byId("kitchenOrders").innerHTML='<div class="kitchen-grid">'+kitchenOrders.map(o=>`<div class="kitchen-card"><div class="card-head"><span>${o.foodNumber?`<span class="food-number">#${o.foodNumber}</span>`:esc(o.note||"Jídlo")}</span><span>${esc(o.note||"")}</span></div><div class="small">${nowText(o.createdAt)}</div><ul>${o.items.map(i=>`<li>${i.qty}× ${esc(i.name)}</li>`).join("")}</ul><button class="big-btn primary" style="width:100%" data-kitchen-done="${o.id}">HOTOVO</button></div>`).join("")+'</div>'}
 
 function unlockTicketEdit(){
