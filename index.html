@@ -167,6 +167,83 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}th,td{b
   margin-bottom:4px;
 }
 
+
+.ticket-edit-toolbar{
+  background:#fff7ed;
+  border:2px solid #fb923c;
+  border-radius:18px;
+  padding:12px;
+  margin-bottom:12px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.ticket-edit-toolbar button{
+  min-height:52px;
+  border-radius:14px;
+  font-size:16px;
+}
+.ticket-edit-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:8px;
+}
+.ticket-edit-actions button{
+  min-height:44px;
+  border-radius:12px;
+  font-size:14px;
+}
+
+
+.sales-login-box{
+  background:#f9fafb;
+  border:3px solid #e5e7eb;
+  border-radius:24px;
+  padding:24px;
+  text-align:center;
+  max-width:520px;
+  margin:20px auto;
+}
+.sales-login-icon{
+  font-size:46px;
+  margin-bottom:8px;
+}
+.sales-login-title{
+  font-size:28px;
+  font-weight:900;
+  margin-bottom:8px;
+  color:#111827;
+}
+.sales-login-text{
+  font-size:16px;
+  color:#6b7280;
+  font-weight:700;
+  margin-bottom:18px;
+}
+.sales-password-input{
+  width:100%;
+  min-height:64px;
+  border-radius:18px;
+  border:3px solid #d1d5db;
+  font-size:28px;
+  text-align:center;
+  font-weight:900;
+  padding:8px 14px;
+  margin-bottom:14px;
+  outline:none;
+}
+.sales-password-input:focus{
+  border-color:#2563eb;
+  box-shadow:0 0 0 4px rgba(37,99,235,.15);
+}
+.sales-login-btn{
+  width:100%;
+  min-height:66px;
+  border-radius:18px;
+  font-size:22px;
+}
+
 </style>
 </head>
 <body>
@@ -174,7 +251,7 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}th,td{b
 <button class="tab-btn active" data-tab="food">🍔 Jídlo</button>
 <button class="tab-btn" data-tab="drinks">🍺 Pití</button>
 <button class="tab-btn" data-tab="kitchen">👨‍🍳 Kuchyň</button>
-<button class="tab-btn" data-tab="sales">🧾 Lístky / tržba</button>
+<button class="tab-btn" data-tab="tickets">🧾 Lístky</button><button class="tab-btn" data-tab="sales">💰 Tržba</button>
 </div></div></header>
 
 <main>
@@ -190,10 +267,21 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}th,td{b
 
 <section id="screen-kitchen" class="screen"><div class="card"><h2 class="section-title">👨‍🍳 Kuchyň</h2><div id="kitchenOrders"></div></div></section>
 
-<section id="screen-sales" class="screen"><div class="sales-layout">
+<section id="screen-tickets" class="screen">
 <div class="card"><h2 class="section-title">🧾 Lístky</h2><div id="ticketsList"></div></div>
-<div class="card"><h2 class="section-title">Tržba</h2><div id="salesLogin"><p class="small">Tržba je skrytá.</p><input id="salesPassword" type="password" placeholder="Heslo"><button class="big-btn blue" style="width:100%" id="unlockSalesBtn">ZOBRAZIT TRŽBU</button></div><div id="salesPanel" style="display:none"><div class="cart-total"><span>Tržba</span><span id="salesTotal">0 Kč</span></div><div id="salesSummary"></div><div class="row-actions"><button class="blue" id="csvBtn">CSV</button><button class="danger" id="resetBtn">RESET VŠEHO</button></div><button class="big-btn ghost" style="width:100%;margin-top:10px" id="lockSalesBtn">SKRÝT TRŽBU</button></div></div>
-</div></section>
+</section>
+
+<section id="screen-sales" class="screen">
+<div class="card"><h2 class="section-title">Tržba</h2><div id="salesLogin">
+  <div class="sales-login-box">
+    <div class="sales-login-icon">🔒</div>
+    <div class="sales-login-title">Tržba je chráněná heslem</div>
+    <div class="sales-login-text">Zadej heslo pro zobrazení tržby, QR/hotovosti a souhrnu položek.</div>
+    <input id="salesPassword" class="sales-password-input" type="password" inputmode="numeric" placeholder="••••••">
+    <button class="big-btn blue sales-login-btn" id="unlockSalesBtn">ZOBRAZIT TRŽBU</button>
+  </div>
+</div><div id="salesPanel" style="display:none"><div class="cart-total"><span>Tržba</span><span id="salesTotal">0 Kč</span></div><div id="salesSummary"></div><div class="row-actions"><button class="blue" id="csvBtn">CSV</button><button class="danger" id="resetBtn">RESET VŠEHO</button></div><button class="big-btn ghost" style="width:100%;margin-top:10px" id="lockSalesBtn">SKRÝT TRŽBU</button></div></div>
+</section>
 </main>
 
 <div class="modal-backdrop" id="parekModal"><div class="modal"><h3>Párek v rohlíku</h3><div class="modal-buttons"><button class="primary" data-parek="kečup">KEČUP</button><button class="yellow" data-parek="hořčice">HOŘČICE</button><button class="ghost" data-parek="bez ničeho">BEZ NIČEHO</button></div></div></div>
@@ -206,7 +294,7 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}th,td{b
 
 <div class="popup-backdrop" id="shotModal"><div class="popup"><h2 style="margin-top:0;text-align:center;font-size:32px">🥃 Panáky</h2><div id="shotGrid" class="popup-grid"></div><button class="big-btn ghost" style="width:100%;margin-top:16px" data-close="shotModal">ZAVŘÍT</button></div></div>
 
-<div class="popup-backdrop" id="paymentModal"><div class="payment-modal"><h2>Způsob platby</h2><div class="payment-buttons"><button class="primary" id="payCashBtn" type="button" onclick="choosePaymentSafe(\'cash\')">HOTOVĚ</button><button class="blue" id="payQrBtn" type="button" onclick="showQrPreview(window.lastPendingAmount || getCurrentPaymentAmount())">QR</button></div><button class="big-btn ghost" style="width:100%;margin-top:14px" data-close="paymentModal">ZPĚT</button></div></div>
+<div class="popup-backdrop" id="paymentModal"><div class="payment-modal"><h2>Způsob platby</h2><div class="payment-buttons"><button class="primary" id="payCashBtn" type="button" onclick="choosePaymentSafe(\'cash\')">HOTOVĚ</button><button class="blue" id="payQrBtn" type="button" onclick="showQrPreview(window.lastPendingAmount || 0)">QR</button></div><button class="big-btn ghost" style="width:100%;margin-top:14px" data-close="paymentModal">ZPĚT</button></div></div>
 
 
 <div class="popup-backdrop" id="qrPreviewModal">
@@ -320,9 +408,11 @@ let tickets=JSON.parse(localStorage.getItem("pos_clean_tickets")||"[]");
 let sales=JSON.parse(localStorage.getItem("pos_clean_sales")||"[]");
 let nextFoodNumber=Number(localStorage.getItem("pos_clean_nextFoodNumber")||"1");
 let activeTicketId=null;
+let activeTicketSessionCounts={};
 let activeTicketHistorySessionId=null;
 let activeTicketGroupId=null;
 let salesUnlocked=false;
+let ticketEditUnlocked=false;
 let pendingPayment=null;
 let isApplyingRemoteState=false;
 let firebaseSyncStarted=false;
@@ -364,6 +454,7 @@ function applyPOSStateFromFirebase(data){
 }
 
 function save(){
+  recalcAllTickets();
   saveLocalOnly();
   if(window.firebaseSaveState && !isApplyingRemoteState){
     window.firebaseSaveState(getPOSStateForFirebase()).catch(err=>{
@@ -542,6 +633,78 @@ renderAll();
 }
 
 
+
+function addToActiveTicketSessionCount(id, qty=1){
+  if(!activeTicketId) return;
+  activeTicketSessionCounts[id]=(activeTicketSessionCounts[id]||0)+qty;
+}
+
+
+
+function getCurrentTicketHistoryGroupObject(ticket){
+  if(typeof getCurrentHistoryGroup === "function"){
+    return getCurrentHistoryGroup(ticket);
+  }
+
+  if(!ticket.history) ticket.history=[];
+
+  let group = ticket.history.find(g=>g.id===activeTicketHistorySessionId);
+
+  if(!group){
+    group = {
+      id: Date.now()+Math.floor(Math.random()*10000),
+      createdAt: new Date().toISOString(),
+      items: [],
+      total: 0
+    };
+    ticket.history.unshift(group);
+    activeTicketHistorySessionId = group.id;
+  }
+
+  return group;
+}
+
+function addFoodToKitchenForCurrentTicketSession(ticket,item){
+  if(item.type !== "food") return;
+
+  const group = getCurrentTicketHistoryGroupObject(ticket);
+
+  if(!group.foodNumber){
+    group.foodNumber = nextFoodNumber++;
+  }
+
+  let kitchenOrder = kitchenOrders.find(k =>
+    String(k.parentId) === String(ticket.id) &&
+    String(k.groupId || "") === String(group.id)
+  );
+
+  if(!kitchenOrder){
+    kitchenOrder = {
+      id: Date.now()+Math.floor(Math.random()*10000),
+      parentId: ticket.id,
+      groupId: group.id,
+      note: ticket.note,
+      foodNumber: group.foodNumber,
+      createdAt: new Date().toISOString(),
+      items: [],
+      total: 0
+    };
+    kitchenOrders.unshift(kitchenOrder);
+  }
+
+  const existing = kitchenOrder.items.find(i=>i.id===item.id);
+
+  if(existing){
+    existing.qty += item.qty;
+    existing.total += item.total;
+  }else{
+    kitchenOrder.items.push({...item});
+  }
+
+  kitchenOrder.total = kitchenOrder.items.reduce((s,i)=>s+i.total,0);
+}
+
+
 function addCustomProduct(id,name,price,category,type){
 const item={id,name,category,type,price,qty:1,total:price};
 
@@ -571,9 +734,10 @@ if(activeTicketId){
   }
 
   if(type==="food"){
-    createKitchenOrder(ticket.id,ticket.note,nextFoodNumber++,[item]);
+    addFoodToKitchenForCurrentTicketSession(ticket,item);
   }
 
+  addToActiveTicketSessionCount(id,1);
   save();
   renderAll();
   flash("Přidáno na lístek "+ticket.note);
@@ -587,6 +751,7 @@ renderAll();
 
 function selectActiveTicket(id){
 activeTicketId=id;
+activeTicketSessionCounts={};
 activeTicketHistorySessionId=null;
 activeTicketGroupId=null;
 save();
@@ -594,7 +759,7 @@ renderAll();
 flash("Lístek otevřen");
 }
 
-function clearActiveTicket(){activeTicketId=null;activeTicketHistorySessionId=null;renderAll();flash("Lístek zavřen")}
+function clearActiveTicket(){activeTicketId=null;activeTicketSessionCounts={};renderAll();flash("Lístek zavřen")}
 function createTicket(){
 const name=prompt("Zadej jméno pro lístek:");
 if(!name||!name.trim()){
@@ -615,6 +780,7 @@ const ticket={
 
 tickets.unshift(ticket);
 activeTicketId=ticket.id;
+activeTicketSessionCounts={};
 activeTicketGroupId=null;
 
 if(items.length){
@@ -659,7 +825,7 @@ if(foodNumber){
 cart={};
 save();
 renderAll();
-flash(foodNumber ? "Objednávka jídla #"+foodNumber : "Objednávka zaplacena");
+flash(foodNumber?"Objednávka jídla #"+foodNumber:"Objednávka zaplacena");
 }
 
 function payTicket(id){const t=tickets.find(x=>x.id===id);if(!t)return;rebuildTicketFromGroups(t);if(!t.items.length){alert("Lístek je prázdný.");return}window.lastPendingAmount=t.total; window.lastPendingAmount=t.total; pendingPayment=method=>{t.paid=true;sales.push({...t,paymentMethod:method,paidAt:new Date().toISOString()});tickets=tickets.filter(x=>x.id!==id);if(activeTicketId===id){activeTicketId=null;activeTicketGroupId=null;}save();renderAll();flash("Lístek zaplacen")};showModal("paymentModal")}
@@ -671,10 +837,7 @@ function kitchenDone(id){kitchenOrders=kitchenOrders.filter(o=>o.id!==id);save()
 
 function getSelectedQtyForProduct(id){
   if(activeTicketId){
-    const ticket = tickets.find(t=>t.id===activeTicketId);
-    if(!ticket || !ticket.items) return 0;
-    const item = ticket.items.find(i=>i.id===id);
-    return item ? item.qty : 0;
+    return activeTicketSessionCounts[id] || 0;
   }
   return cart[id] || 0;
 }
@@ -803,7 +966,101 @@ function ticketHistoryHtml(ticket){
   return '<div class="ticket-history">'+groups.map((group,index)=>{
     const orderNumber = groups.length-index;
     const rows = group.items.map(i=>`<div class="ticket-history-row"><span>${i.qty}× ${esc(i.name)}</span><strong>${money(i.total)}</strong></div>`).join("");
-    return `<div class="ticket-history-group"><div class="ticket-history-title">Objednávka ${orderNumber}</div>${rows}<div style="text-align:right;font-weight:900;margin-top:4px;">${money(group.total||0)}</div></div>`;
+    return `<div class="ticket-history-group">
+      <div class="ticket-history-title">Objednávka ${orderNumber}${group.foodNumber ? " / kuchyň #"+group.foodNumber : ""}</div>
+      ${rows}
+      <div style="text-align:right;font-weight:900;margin-top:4px;">${money(group.total||0)}</div>
+      ${ticketEditUnlocked ? `<button class="danger" style="width:100%;min-height:42px;border-radius:12px;margin-top:8px;" type="button" onclick="removeTicketHistoryGroup(${ticket.id},${group.id})">SMAZAT TUTO OBJEDNÁVKU</button>` : ""}
+    </div>`;
+  }).join("")+'</div>';
+}
+
+
+
+function currentTicketSessionItems(ticket){
+  if(!ticket || !ticket.items) return [];
+
+  return ticket.items
+    .filter(i => (activeTicketSessionCounts[i.id] || 0) > 0)
+    .map(i => ({
+      ...i,
+      qty: activeTicketSessionCounts[i.id],
+      total: (activeTicketSessionCounts[i.id] || 0) * i.price
+    }));
+}
+
+function editCurrentTicketSessionItem(itemId, delta){
+  const ticket = tickets.find(t=>t.id===activeTicketId);
+  if(!ticket) return;
+
+  const currentQty = activeTicketSessionCounts[itemId] || 0;
+  const nextQty = Math.max(0, currentQty + delta);
+  const diff = nextQty - currentQty;
+
+  if(diff === 0) return;
+
+  activeTicketSessionCounts[itemId] = nextQty;
+  if(nextQty === 0) delete activeTicketSessionCounts[itemId];
+
+  const item = ticket.items.find(i=>i.id===itemId);
+  if(item){
+    item.qty = Math.max(0, item.qty + diff);
+    item.total = item.qty * item.price;
+
+    if(item.qty === 0){
+      ticket.items = ticket.items.filter(i=>i.id!==itemId);
+    }
+  }
+
+  ticket.total = ticket.items.reduce((s,i)=>s+i.total,0);
+
+  // Upraví i aktuální historii objednávky, ale staré objednávky nechá beze změny.
+  if(ticket.history && activeTicketHistorySessionId){
+    const group = ticket.history.find(g=>g.id===activeTicketHistorySessionId);
+    if(group){
+      const hItem = group.items.find(i=>i.id===itemId);
+      if(hItem){
+        hItem.qty = Math.max(0, hItem.qty + diff);
+        hItem.total = hItem.qty * hItem.price;
+        if(hItem.qty === 0){
+          group.items = group.items.filter(i=>i.id!==itemId);
+        }
+      }
+      group.total = group.items.reduce((s,i)=>s+i.total,0);
+    }
+  }
+
+  save();
+  renderAll();
+}
+
+
+
+function activeTicketCurrentItemsHtml(t){
+  if(!t || !t.items || !t.items.length){
+    return '<div class="active-ticket-items">Zatím bez položek v aktuálním přidávání</div>';
+  }
+
+  const currentItems = currentTicketSessionItems(t);
+
+  if(!currentItems.length){
+    return '<div class="active-ticket-items"><div class="small">Zatím jsi v tomto otevření lístku nic nepřidal.</div></div>';
+  }
+
+  return '<div class="active-ticket-items"><div style="font-weight:900;color:#111827;margin-bottom:6px;">Aktuální přidávání</div>'+currentItems.map(i=>{
+    const safeId = JSON.stringify(i.id);
+    return `
+      <div style="display:block;border-bottom:1px solid #e5e7eb;padding:8px 0;">
+        <div style="display:flex;justify-content:space-between;gap:8px;">
+          <span>${i.qty}× ${esc(i.name)}</span>
+          <strong>${money(i.total)}</strong>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+          <button class="ghost" style="min-height:44px;border-radius:12px;font-size:14px;" type="button" onclick='editCurrentTicketSessionItem(${safeId}, -1)'>ODEBRAT 1</button>
+          <button class="blue" style="min-height:44px;border-radius:12px;font-size:14px;" type="button" onclick='editCurrentTicketSessionItem(${safeId}, 1)'>PŘIDAT 1</button>
+        </div>
+      </div>
+    `;
   }).join("")+'</div>';
 }
 
@@ -814,25 +1071,30 @@ function activeTicketItemsHtml(t){
   }
 
   const history = ticketHistoryHtml(t);
+  const currentItems = currentTicketSessionItems(t);
 
-  const editList = '<div class="active-ticket-items"><div style="font-weight:900;color:#111827;margin-bottom:6px;">Celkem na lístku / úprava položek</div>'+t.items.map(i=>{
-    const safeId = JSON.stringify(i.id);
-    return `
-      <div style="display:block;border-bottom:1px solid #e5e7eb;padding:8px 0;">
-        <div style="display:flex;justify-content:space-between;gap:8px;">
-          <span>${i.qty}× ${esc(i.name)}</span>
-          <strong>${money(i.total)}</strong>
-        </div>
-        ${typeof editActiveTicketItem === "function" ? `
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
-          <button class="ghost" style="min-height:44px;border-radius:12px;font-size:14px;" type="button" onclick='editActiveTicketItem(${safeId}, -1)'>ODEBRAT 1</button>
-          <button class="blue" style="min-height:44px;border-radius:12px;font-size:14px;" type="button" onclick='editActiveTicketItem(${safeId}, 1)'>PŘIDAT 1</button>
-        </div>` : ""}
-      </div>
-    `;
-  }).join("")+'</div>';
+  const currentEdit = '<div class="active-ticket-items"><div style="font-weight:900;color:#111827;margin-bottom:6px;">Aktuální přidávání</div>'+
+    (currentItems.length
+      ? currentItems.map(i=>{
+          const safeId = JSON.stringify(i.id);
+          return `
+            <div style="display:block;border-bottom:1px solid #e5e7eb;padding:8px 0;">
+              <div style="display:flex;justify-content:space-between;gap:8px;">
+                <span>${i.qty}× ${esc(i.name)}</span>
+                <strong>${money(i.total)}</strong>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+                <button class="ghost" style="min-height:44px;border-radius:12px;font-size:14px;" type="button" onclick='editCurrentTicketSessionItem(${safeId}, -1)'>ODEBRAT 1</button>
+                <button class="blue" style="min-height:44px;border-radius:12px;font-size:14px;" type="button" onclick='editCurrentTicketSessionItem(${safeId}, 1)'>PŘIDAT 1</button>
+              </div>
+            </div>
+          `;
+        }).join("")
+      : '<div class="small">Zatím jsi v tomto otevření lístku nic nepřidal.</div>'
+    )+
+  '</div>';
 
-  return history + editList;
+  return history + currentEdit;
 }
 
 function renderActiveBanner(){
@@ -841,7 +1103,7 @@ const html=t?`<div class="active-banner">
   <div class="active-title">PŘIDÁVÁŠ ROVNOU NA LÍSTEK</div>
   <div class="active-name">${esc(t.note)}</div>
   <div class="active-total">${money(t.total)}</div>
-  ${activeTicketItemsHtml(t)}
+  ${activeTicketCurrentItemsHtml(t)}
   <button class="big-btn ghost clearActiveTicketBtn" style="width:100%" type="button">ZAVŘÍT LÍSTEK</button>
 </div>`:"";
 byId("activeTicketBannerFood").innerHTML=html;
@@ -849,6 +1111,7 @@ byId("activeTicketBannerDrinks").innerHTML=html;
 }
 
 function renderQuickTickets(){
+recalcAllTickets();
 const html=tickets.length?'<div class="ticket-grid">'+tickets.map(t=>{
   const isActive = t.id===activeTicketId;
   return `<div class="ticket-tile ${isActive?'active':''}">
@@ -871,14 +1134,225 @@ byId("quickTicketsDrinks").innerHTML=html;
 
 function renderActiveOrders(){const html=activeOrders.length?activeOrders.map(o=>`<div class="order-card"><div class="card-head"><span>${o.foodNumber?`<span class="food-number">#${o.foodNumber}</span>`:'Bez čísla'}</span><span>${money(o.total)}</span></div><div class="small">${nowText(o.createdAt)} • zaplaceno</div><ul>${o.items.map(i=>`<li>${i.qty}× ${esc(i.name)} – ${money(i.total)}</li>`).join("")}</ul><div class="row-actions"><button class="yellow" data-order-done="${o.id}">HOTOVO</button><button class="danger" data-order-mistake="${o.id}">OMYL</button></div></div>`).join(""):'<div class="empty">Žádné objednávky</div>';byId("activeOrdersFood").innerHTML=html;byId("activeOrdersDrinks").innerHTML=html}
 function renderKitchen(){if(!kitchenOrders.length){byId("kitchenOrders").innerHTML='<div class="empty">Kuchyň nemá žádné objednávky</div>';return}byId("kitchenOrders").innerHTML='<div class="kitchen-grid">'+kitchenOrders.map(o=>`<div class="kitchen-card"><div class="card-head"><span>${o.foodNumber?`<span class="food-number">#${o.foodNumber}</span>`:esc(o.note||"Jídlo")}</span><span>${esc(o.note||"")}</span></div><div class="small">${nowText(o.createdAt)}</div><ul>${o.items.map(i=>`<li>${i.qty}× ${esc(i.name)}</li>`).join("")}</ul><button class="big-btn primary" style="width:100%" data-kitchen-done="${o.id}">HOTOVO</button></div>`).join("")+'</div>'}
-function renderTicketsFull(){byId("ticketsList").innerHTML=tickets.length?tickets.map(t=>`<div class="ticket-card ${t.id===activeTicketId?'active':''}"><div class="card-head"><span>${esc(t.note)}</span><span>${money(t.total)}</span></div><div class="small">Nezaplaceno</div>${activeTicketItemsHtml(t)}<div class="row-actions" style="grid-template-columns:1fr 1fr; margin-top:10px;">
-<button class="blue" data-select-ticket="${t.id}">Otevřít</button>
-<button class="ghost close-ticket-btn" type="button" onclick="clearActiveTicket()">Zavřít lístek</button>
-</div>
-<div class="row-actions" style="grid-template-columns:1fr 1fr; margin-top:8px;">
-<button class="primary" data-pay-ticket="${t.id}">Zaplatit</button>
-<button class="danger" data-delete-ticket="${t.id}">Smazat</button>
-</div></div>`).join(""):'<div class="empty">Žádné nezaplacené lístky</div>'}
+
+function unlockTicketEdit(){
+  const pass = prompt("Zadej heslo pro opravy:");
+  if(pass !== PASSWORD){
+    alert("Špatné heslo.");
+    return;
+  }
+  ticketEditUnlocked = true;
+  renderAll();
+  flash("Opravy odemčeny");
+}
+
+function lockTicketEdit(){
+  ticketEditUnlocked = false;
+  renderAll();
+  flash("Opravy zamčeny");
+}
+
+function editTicketItem(ticketId,itemId,delta){
+  if(!ticketEditUnlocked){
+    alert("Nejdřív odemkni opravy.");
+    return;
+  }
+
+  const ticket = tickets.find(t=>t.id===ticketId);
+  if(!ticket) return;
+
+  const item = ticket.items.find(i=>i.id===itemId);
+  if(!item) return;
+
+  item.qty = Math.max(0, item.qty + delta);
+  item.total = item.qty * item.price;
+
+  if(item.qty === 0){
+    ticket.items = ticket.items.filter(i=>i.id!==itemId);
+  }
+
+  ticket.total = ticket.items.reduce((s,i)=>s+i.total,0);
+
+  save();
+  renderAll();
+}
+
+function removeTicketHistoryGroup(ticketId,groupId){
+  if(!ticketEditUnlocked){
+    alert("Nejdřív odemkni opravy.");
+    return;
+  }
+
+  if(!confirm("Smazat tuto část objednávky z lístku?")) return;
+
+  const ticket = tickets.find(t=>t.id===ticketId);
+  if(!ticket || !ticket.history) return;
+
+  const group = ticket.history.find(g=>g.id===groupId);
+  if(group && group.items){
+    group.items.forEach(gItem=>{
+      const item = ticket.items.find(i=>i.id===gItem.id);
+      if(item){
+        item.qty = Math.max(0, item.qty - gItem.qty);
+        item.total = item.qty * item.price;
+      }
+    });
+
+    ticket.items = ticket.items.filter(i=>i.qty>0);
+    ticket.total = ticket.items.reduce((s,i)=>s+i.total,0);
+  }
+
+  ticket.history = ticket.history.filter(g=>g.id!==groupId);
+
+  save();
+  renderAll();
+}
+
+function ticketEditItemsHtml(ticket){
+  if(!ticketEditUnlocked || !ticket.items || !ticket.items.length) return "";
+
+  return '<div class="active-ticket-items"><div style="font-weight:900;margin-bottom:6px;">Oprava položek</div>'+
+    ticket.items.map(i=>{
+      const safeTicket = JSON.stringify(ticket.id);
+      const safeItem = JSON.stringify(i.id);
+      return `<div style="display:block;border-bottom:1px solid #e5e7eb;padding:8px 0;">
+        <div style="display:flex;justify-content:space-between;gap:8px;">
+          <span>${i.qty}× ${esc(i.name)}</span>
+          <strong>${money(i.total)}</strong>
+        </div>
+        <div class="ticket-edit-actions">
+          <button class="ghost" type="button" onclick='editTicketItem(${safeTicket},${safeItem},-1)'>ODEBRAT 1</button>
+          <button class="blue" type="button" onclick='editTicketItem(${safeTicket},${safeItem},1)'>PŘIDAT 1</button>
+        </div>
+      </div>`;
+    }).join("")+
+  '</div>';
+}
+
+
+
+function startTicketPayment(ticketId){
+  recalcAllTickets();
+  const numericId = Number(ticketId);
+  const t = tickets.find(x=>Number(x.id)===numericId || String(x.id)===String(ticketId));
+
+  if(!t){
+    alert("Lístek se nepodařilo najít.");
+    return;
+  }
+
+  if(!t.items || !t.items.length){
+    alert("Lístek je prázdný.");
+    return;
+  }
+
+  window.lastPendingAmount = t.total;
+
+  pendingPayment = function(method){
+    t.paid = true;
+    t.paymentMethod = method;
+    t.paidAt = new Date().toISOString();
+
+    sales.push({
+      ...t,
+      paymentMethod: method,
+      paidAt: t.paidAt
+    });
+
+    tickets = tickets.filter(x=>String(x.id)!==String(ticketId));
+
+    if(String(activeTicketId)===String(ticketId)){
+      activeTicketId = null;
+      if(typeof activeTicketSessionCounts !== "undefined") activeTicketSessionCounts = {};
+      if(typeof activeTicketHistorySessionId !== "undefined") activeTicketHistorySessionId = null;
+    }
+
+    save();
+    renderAll();
+    flash("Lístek zaplacen");
+  };
+
+  showModal("paymentModal");
+}
+
+
+
+function recalcOneTicket(ticket){
+  if(!ticket) return;
+
+  if(!Array.isArray(ticket.items)){
+    ticket.items = [];
+  }
+
+  ticket.items = ticket.items
+    .filter(i => i && Number(i.qty || 0) > 0)
+    .map(i => ({
+      ...i,
+      qty: Number(i.qty || 0),
+      price: Number(i.price || 0),
+      total: Number(i.qty || 0) * Number(i.price || 0)
+    }));
+
+  ticket.total = ticket.items.reduce((s,i)=>s+i.total,0);
+
+  if(Array.isArray(ticket.history)){
+    ticket.history = ticket.history
+      .map(group => {
+        group.items = Array.isArray(group.items)
+          ? group.items
+              .filter(i => i && Number(i.qty || 0) > 0)
+              .map(i => ({
+                ...i,
+                qty: Number(i.qty || 0),
+                price: Number(i.price || 0),
+                total: Number(i.qty || 0) * Number(i.price || 0)
+              }))
+          : [];
+        group.total = group.items.reduce((s,i)=>s+i.total,0);
+        return group;
+      })
+      .filter(group => group.items.length > 0);
+  }
+}
+
+function recalcAllTickets(){
+  tickets.forEach(t=>recalcOneTicket(t));
+}
+
+
+function renderTicketsFull(){
+recalcAllTickets();
+const box=byId("ticketsList");
+if(!box)return;
+
+const toolbar=`<div class="ticket-edit-toolbar">
+  ${ticketEditUnlocked
+    ? `<button class="ghost" type="button" onclick="lockTicketEdit()">🔒 Zamknout opravy</button><div style="display:flex;align-items:center;font-weight:900;color:#c2410c;">Opravy jsou odemčené</div>`
+    : `<button class="yellow" type="button" onclick="unlockTicketEdit()">🔓 Odemknout opravy</button><div style="display:flex;align-items:center;font-weight:900;color:#6b7280;">Úpravy jsou pod heslem</div>`
+  }
+</div>`;
+
+if(!tickets.length){
+  box.innerHTML=toolbar+'<div class="empty">Žádné nezaplacené lístky</div>';
+  return;
+}
+
+box.innerHTML=toolbar+tickets.map(t=>`<div class="ticket-card ${t.id===activeTicketId?'active':''}">
+  <div class="card-head"><span>${esc(t.note)}</span><span>${money(t.total)}</span></div>
+  <div class="small">Nezaplaceno</div>
+  ${activeTicketItemsHtml(t)}
+  ${ticketEditItemsHtml(t)}
+
+  <div class="row-actions" style="grid-template-columns:1fr 1fr; margin-top:10px;">
+    ${t.id===activeTicketId
+      ? `<button class="ghost" type="button" onclick="clearActiveTicket()">Zavřít lístek</button>`
+      : `<button class="blue" type="button" data-select-ticket="${t.id}">Otevřít</button>`
+    }
+
+    <button class="primary" type="button" onclick="startTicketPayment(\'${t.id}\')">Zaplatit</button>
+  </div>
+</div>`).join("");
+}
 function renderSales(){
 if(!salesUnlocked)return;
 
@@ -939,12 +1413,8 @@ function updateModeButtons(){const inTicket=!!activeTicketId;["actionsFood","act
 
 function getSelectedQtyForId(id){
   if(activeTicketId){
-    const ticket = tickets.find(t=>t.id===activeTicketId);
-    if(!ticket || !ticket.items) return 0;
-    const item = ticket.items.find(i=>i.id===id);
-    return item ? item.qty : 0;
+    return activeTicketSessionCounts[id] || 0;
   }
-
   return cart[id] || 0;
 }
 
@@ -1169,7 +1639,13 @@ document.querySelectorAll(".tab-btn").forEach(b=>b.onclick=()=>showTab(b.dataset
 byId("paidBtnFood").onclick=createPaidOrder;byId("paidBtnDrinks").onclick=createPaidOrder;
 byId("ticketBtnFood").onclick=createTicket;byId("ticketBtnDrinks").onclick=createTicket;
 byId("clearBtnFood").onclick=clearCartSafe;byId("clearBtnDrinks").onclick=clearCartSafe;
-byId("unlockSalesBtn").onclick=unlockSales;byId("lockSalesBtn").onclick=lockSales;byId("csvBtn").onclick=downloadCSV;byId("resetBtn").onclick=resetAll;
+byId("unlockSalesBtn").onclick=unlockSales;
+const salesPasswordInput=byId("salesPassword");
+if(salesPasswordInput){
+  salesPasswordInput.addEventListener("keydown",function(e){
+    if(e.key==="Enter") unlockSales();
+  });
+}byId("lockSalesBtn").onclick=lockSales;byId("csvBtn").onclick=downloadCSV;byId("resetBtn").onclick=resetAll;
 byId("payCashBtn").onclick=()=>choosePaymentSafe("cash");
 byId("payQrBtn").onclick=()=>showQrPreview(window.lastPendingAmount || getCurrentPaymentAmount());
 ["parekModal","tapModal","drinkModal","candyModal","shotModal","paymentModal"].forEach(id=>{const el=byId(id);el.addEventListener("click",e=>{if(e.target===el)closeModal(id)})});
