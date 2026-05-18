@@ -1,9 +1,1217 @@
-{
-  "name": "Gastro POS",
-  "short_name": "POS",
-  "start_url": "./",
-  "display": "standalone",
-  "background_color": "#111827",
-  "theme_color": "#111827",
-  "icons": []
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Tablet POS</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#eef0f4;color:#111827;touch-action:manipulation}
+button{font-family:inherit;border:0;cursor:pointer;font-weight:900;touch-action:manipulation;user-select:none}
+input{font-family:inherit}
+header{background:#111827;color:white;padding:10px 14px;position:sticky;top:0;z-index:50;box-shadow:0 4px 18px rgba(0,0,0,.2)}
+.header-row{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+h1{margin:0;font-size:22px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.tab-btn{background:#374151;color:white;border-radius:14px;min-height:48px;padding:0 16px;font-size:16px}
+.tab-btn.active{background:#16a34a}
+main{max-width:1400px;margin:0 auto;padding:14px}
+.screen{display:none}.screen.active{display:block}
+.pos-layout{display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:14px;align-items:start}
+@media(max-width:980px){.header-row{grid-template-columns:1fr}.tabs{justify-content:stretch}.tab-btn{flex:1}.pos-layout{grid-template-columns:1fr}}
+.card{background:white;border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,.08);padding:14px;margin-bottom:14px}
+.section-title{margin:0 0 12px;font-size:22px;font-weight:900}
+.category-title{margin:18px 0 10px;font-size:18px;font-weight:900;color:#374151}
+.product-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media(max-width:760px){.product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.product-btn{min-height:104px;border-radius:22px;padding:12px;text-align:left;color:white;box-shadow:0 6px 16px rgba(0,0,0,.12);display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+.product-btn:active{transform:scale(.98)}
+.food{background:#f59e0b}.drink{background:#2563eb}.sweets{background:#9333ea}
+.product-name{font-size:20px;line-height:1.1;font-weight:900}.product-price{font-size:18px;font-weight:900;opacity:.95}
+.product-qty{position:absolute;top:8px;right:8px;width:36px;height:36px;border-radius:999px;background:rgba(0,0,0,.28);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900}
+.side-panel{position:sticky;top:84px;display:grid;gap:14px}
+@media(max-width:980px){.side-panel{position:static}}
+.cart-total{background:#111827;color:white;border-radius:20px;padding:16px;display:flex;justify-content:space-between;align-items:center;font-size:24px;font-weight:900;margin-bottom:10px}
+.big-actions{display:grid;grid-template-columns:1fr;gap:10px}.big-btn{min-height:60px;border-radius:18px;font-size:19px}
+.primary{background:#16a34a;color:white}.blue{background:#2563eb;color:white}.danger{background:#dc2626;color:white}.yellow{background:#f59e0b;color:#111827}.ghost{background:#e5e7eb;color:#111827}
+.cart-item{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid #e5e7eb;font-size:17px}
+.cart-controls{display:flex;align-items:center;gap:6px}.mini-btn{width:42px;height:42px;border-radius:12px;font-size:22px;background:#e5e7eb}
+.ticket-card,.order-card,.kitchen-card{border-radius:20px;padding:14px;margin-bottom:10px;border:3px solid transparent}
+.ticket-card{background:#fef2f2;border-color:#dc2626}.ticket-card.active{background:#dbeafe;border-color:#2563eb}
+.order-card{background:#ecfdf5;border-color:#16a34a}.kitchen-card{background:#fffbeb;border-color:#f59e0b}
+.card-head{display:flex;justify-content:space-between;gap:8px;font-size:18px;font-weight:900;margin-bottom:6px}
+.small{font-size:13px;color:#6b7280}.empty{color:#6b7280;background:#f9fafb;border:2px dashed #d1d5db;border-radius:18px;padding:16px;text-align:center;font-weight:700}
+.row-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.row-actions.three{grid-template-columns:1fr 1fr 1fr}
+.row-actions button{min-height:52px;border-radius:16px;font-size:15px}ul{margin:8px 0;padding-left:20px;font-size:16px}
+.kitchen-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}@media(max-width:760px){.kitchen-grid{grid-template-columns:1fr}}
+.kitchen-card .card-head{font-size:24px}.kitchen-card li{font-size:22px;font-weight:900;margin-bottom:8px}
+.sales-layout{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:900px){.sales-layout{grid-template-columns:1fr}}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}th,td{border-bottom:1px solid #e5e7eb;padding:9px;text-align:left}th{background:#f9fafb}
+.flash{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#16a34a;color:white;padding:14px 22px;border-radius:999px;font-size:18px;font-weight:900;z-index:2000;box-shadow:0 12px 28px rgba(0,0,0,.25);display:none}
+.active-banner{background:#dbeafe;border:4px solid #2563eb;border-radius:22px;padding:14px;margin-bottom:12px;font-weight:900;text-align:center}
+.active-title{font-size:15px;color:#1e40af;margin-bottom:4px}.active-name{font-size:28px;color:#111827;margin-bottom:4px}.active-total{font-size:24px;color:#111827;margin-bottom:10px}
+.active-ticket-items{background:white;border-radius:14px;padding:8px 10px;margin:8px 0 10px;text-align:left;font-size:15px;color:#111827}
+.active-ticket-items div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid #e5e7eb;padding:4px 0}.active-ticket-items div:last-child{border-bottom:0}
+.ticket-group{display:block!important;border-bottom:3px solid #cbd5e1!important;padding:8px 0!important}
+.ticket-group:last-child{border-bottom:0!important}
+.ticket-group-title{font-weight:900;color:#1e40af;margin-bottom:4px}
+.ticket-group-row{display:flex!important;justify-content:space-between;gap:8px;border-bottom:1px solid #e5e7eb!important;padding:4px 0!important}
+.ticket-help{background:#eff6ff;border:2px dashed #2563eb;border-radius:18px;padding:14px;text-align:center;font-weight:900;color:#1e40af;margin-bottom:10px}
+.ticket-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media(min-width:1200px){.ticket-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}@media(max-width:760px){.ticket-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ticket-tile{background:#fef2f2;border:2px solid #dc2626;border-radius:16px;padding:9px;min-height:72px;display:flex;flex-direction:column;justify-content:space-between;gap:5px}
+.ticket-tile.active{background:#dbeafe;border-color:#2563eb}.ticket-tile-name{font-size:17px;font-weight:900;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ticket-tile-total{font-size:18px;font-weight:900}
+.ticket-tile button{min-height:36px;border-radius:12px;font-size:13px;width:100%}
+.food-number{font-size:28px;font-weight:900;background:#111827;color:white;border-radius:16px;padding:8px 12px;display:inline-block}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:1500}
+.modal{background:white;border-radius:24px;padding:20px;max-width:420px;width:90%;box-shadow:0 20px 40px rgba(0,0,0,.3)}
+.modal h3{margin-top:0;font-size:28px;text-align:center}.modal-buttons{display:grid;gap:12px}.modal-buttons button{min-height:72px;border-radius:20px;font-size:24px}
+.popup-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:1200}
+.popup{background:white;border-radius:24px;width:min(95vw,700px);max-height:90vh;overflow:auto;padding:20px}
+.popup-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.popup-grid button{min-height:82px;border-radius:18px;font-size:22px;font-weight:900;color:white;padding:10px}
+.tap-btn{background:#1e3a8a}.drink-btn{background:#2563eb}.candy-btn{background:#9333ea}.shot-item{background:#f3f4f6;border-radius:18px;padding:12px}.shot-name{font-size:20px;font-weight:900;margin-bottom:10px;text-align:center}.shot-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}.shot-buttons button{min-height:64px;border-radius:14px;font-size:22px}
+.payment-modal{background:white;border-radius:24px;width:min(92vw,460px);padding:22px;box-shadow:0 20px 40px rgba(0,0,0,.3)}
+.payment-modal h2{margin:0 0 16px;text-align:center;font-size:30px}.payment-buttons{display:grid;grid-template-columns:1fr 1fr;gap:12px}.payment-buttons button{min-height:86px;border-radius:20px;font-size:26px}
+
+.ticket-tile-status{
+  font-size:12px;
+  font-weight:900;
+  color:#6b7280;
+  margin-top:2px;
 }
+.ticket-tile.active .ticket-tile-status{
+  color:#1e40af;
+}
+.ticket-tile.active{
+  background:#dbeafe!important;
+  border-color:#2563eb!important;
+  box-shadow:0 0 0 3px rgba(37,99,235,.15);
+}
+.ticket-tile .tile-actions{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:6px;
+}
+
+
+.ticket-history{
+  background:white;
+  border-radius:14px;
+  padding:8px 10px;
+  margin:8px 0 10px;
+  text-align:left;
+  font-size:15px;
+  color:#111827;
+}
+.ticket-history-group{
+  display:block!important;
+  border-bottom:3px solid #cbd5e1!important;
+  padding:8px 0!important;
+}
+.ticket-history-group:last-child{border-bottom:0!important;}
+.ticket-history-title{
+  font-weight:900;
+  color:#1e40af;
+  margin-bottom:4px;
+}
+.ticket-history-row{
+  display:flex!important;
+  justify-content:space-between;
+  gap:8px;
+  border-bottom:1px solid #e5e7eb!important;
+  padding:4px 0!important;
+}
+
+
+.popup-grid button,
+.shot-buttons button{
+  position:relative;
+}
+.popup-count{
+  position:absolute;
+  top:8px;
+  right:8px;
+  min-width:34px;
+  height:34px;
+  border-radius:999px;
+  background:rgba(0,0,0,.35);
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  font-weight:900;
+  padding:0 8px;
+}
+
+
+.sales-order-card{
+  background:#f9fafb;
+  border:2px solid #e5e7eb;
+  border-radius:16px;
+  padding:12px;
+  margin:10px 0;
+}
+.sales-order-head{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  font-weight:900;
+  margin-bottom:6px;
+}
+.sales-order-items{
+  margin:8px 0 0;
+  padding-left:18px;
+}
+.sales-order-items li{
+  margin-bottom:4px;
+}
+
+</style>
+</head>
+<body>
+<header><div class="header-row"><h1>Tablet POS <span id="syncStatus" style="font-size:13px;font-weight:700;color:#d1d5db;">• lokálně</span></h1><div class="tabs">
+<button class="tab-btn active" data-tab="food">🍔 Jídlo</button>
+<button class="tab-btn" data-tab="drinks">🍺 Pití</button>
+<button class="tab-btn" data-tab="kitchen">👨‍🍳 Kuchyň</button>
+<button class="tab-btn" data-tab="sales">🧾 Lístky / tržba</button>
+</div></div></header>
+
+<main>
+<section id="screen-food" class="screen active"><div class="pos-layout">
+<div><div class="card"><h2 class="section-title">🍔 Jídlo</h2><div id="foodProducts"></div></div><div class="card"><h2 class="section-title">Otevřené lístky</h2><div id="quickTicketsFood"></div></div></div>
+<aside class="side-panel"><div class="card"><h2 class="section-title">Košík</h2><div id="activeTicketBannerFood"></div><div class="cart-total"><span id="cartLabelFood">Celkem</span><span id="cartTotalFood">0 Kč</span></div><div id="cartListFood"></div><div class="big-actions" id="actionsFood"><button class="big-btn primary" id="paidBtnFood">💵 ZAPLATIT</button><button class="big-btn blue" id="ticketBtnFood">VYTVOŘIT LÍSTEK</button><button class="big-btn ghost" id="clearBtnFood" type="button" onclick="clearCartSafe()">VYMAZAT KOŠÍK</button></div></div><div class="card"><h2 class="section-title">Objednávky</h2><div id="activeOrdersFood"></div></div></aside>
+</div></section>
+
+<section id="screen-drinks" class="screen"><div class="pos-layout">
+<div><div class="card"><h2 class="section-title">🍺 Pití / cukrovinky</h2><div id="drinkProducts"></div></div><div class="card"><h2 class="section-title">Otevřené lístky</h2><div id="quickTicketsDrinks"></div></div></div>
+<aside class="side-panel"><div class="card"><h2 class="section-title">Košík</h2><div id="activeTicketBannerDrinks"></div><div class="cart-total"><span id="cartLabelDrinks">Celkem</span><span id="cartTotalDrinks">0 Kč</span></div><div id="cartListDrinks"></div><div class="big-actions" id="actionsDrinks"><button class="big-btn primary" id="paidBtnDrinks">💵 ZAPLATIT</button><button class="big-btn blue" id="ticketBtnDrinks">VYTVOŘIT LÍSTEK</button><button class="big-btn ghost" id="clearBtnDrinks" type="button" onclick="clearCartSafe()">VYMAZAT KOŠÍK</button></div></div><div class="card"><h2 class="section-title">Objednávky</h2><div id="activeOrdersDrinks"></div></div></aside>
+</div></section>
+
+<section id="screen-kitchen" class="screen"><div class="card"><h2 class="section-title">👨‍🍳 Kuchyň</h2><div id="kitchenOrders"></div></div></section>
+
+<section id="screen-sales" class="screen"><div class="sales-layout">
+<div class="card"><h2 class="section-title">🧾 Lístky</h2><div id="ticketsList"></div></div>
+<div class="card"><h2 class="section-title">Tržba</h2><div id="salesLogin"><p class="small">Tržba je skrytá.</p><input id="salesPassword" type="password" placeholder="Heslo"><button class="big-btn blue" style="width:100%" id="unlockSalesBtn">ZOBRAZIT TRŽBU</button></div><div id="salesPanel" style="display:none"><div class="cart-total"><span>Tržba</span><span id="salesTotal">0 Kč</span></div><div id="salesSummary"></div><div class="row-actions"><button class="blue" id="csvBtn">CSV</button><button class="danger" id="resetBtn">RESET VŠEHO</button></div><button class="big-btn ghost" style="width:100%;margin-top:10px" id="lockSalesBtn">SKRÝT TRŽBU</button></div></div>
+</div></section>
+</main>
+
+<div class="modal-backdrop" id="parekModal"><div class="modal"><h3>Párek v rohlíku</h3><div class="modal-buttons"><button class="primary" data-parek="kečup">KEČUP</button><button class="yellow" data-parek="hořčice">HOŘČICE</button><button class="ghost" data-parek="bez ničeho">BEZ NIČEHO</button></div></div></div>
+
+<div class="popup-backdrop" id="tapModal"><div class="popup"><h2 style="margin-top:0;text-align:center;font-size:32px">🍺 Na čepu</h2><div class="popup-grid"><button class="tap-btn" data-simple='{"id":"pivo","name":"Pivo","price":45,"category":"Na čepu","type":"drink"}'>Pivo<br>45 Kč</button><button class="tap-btn" data-simple='{"id":"birell","name":"Birell","price":45,"category":"Na čepu","type":"drink"}'>Birell<br>45 Kč</button><button class="tap-btn" data-simple='{"id":"malinovka","name":"Malinovka","price":35,"category":"Na čepu","type":"drink"}'>Malinovka<br>35 Kč</button></div><button class="big-btn ghost" style="width:100%;margin-top:16px" data-close="tapModal">ZAVŘÍT</button></div></div>
+
+<div class="popup-backdrop" id="drinkModal"><div class="popup"><h2 style="margin-top:0;text-align:center;font-size:32px">🥤 Pití</h2><div class="popup-grid"><button class="drink-btn" data-simple='{"id":"voda","name":"Voda","price":20,"category":"Pití","type":"drink"}'>Voda<br>20 Kč</button><button class="drink-btn" data-simple='{"id":"kava","name":"Káva","price":30,"category":"Pití","type":"drink"}'>Káva<br>30 Kč</button><button class="drink-btn" data-simple='{"id":"redbull","name":"Red Bull","price":50,"category":"Pití","type":"drink"}'>Red Bull<br>50 Kč</button><button class="drink-btn" data-simple='{"id":"dzinus","name":"Džus","price":40,"category":"Pití","type":"drink"}'>Džus<br>40 Kč</button></div><button class="big-btn ghost" style="width:100%;margin-top:16px" data-close="drinkModal">ZAVŘÍT</button></div></div>
+
+<div class="popup-backdrop" id="candyModal"><div class="popup"><h2 style="margin-top:0;text-align:center;font-size:32px">🍬 Cukrovinky</h2><div class="popup-grid"><button class="candy-btn" data-simple='{"id":"brumik","name":"Brumík","price":15,"category":"Cukrovinky","type":"sweets"}'>Brumík<br>15 Kč</button><button class="candy-btn" data-simple='{"id":"tycinky","name":"Tyčinky","price":20,"category":"Cukrovinky","type":"sweets"}'>Tyčinky<br>20 Kč</button><button class="candy-btn" data-simple='{"id":"pendrek","name":"Pendrek","price":5,"category":"Cukrovinky","type":"sweets"}'>Pendrek<br>5 Kč</button><button class="candy-btn" data-simple='{"id":"zele_mys","name":"Želé myš","price":5,"category":"Cukrovinky","type":"sweets"}'>Želé myš<br>5 Kč</button></div><button class="big-btn ghost" style="width:100%;margin-top:16px" data-close="candyModal">ZAVŘÍT</button></div></div>
+
+<div class="popup-backdrop" id="shotModal"><div class="popup"><h2 style="margin-top:0;text-align:center;font-size:32px">🥃 Panáky</h2><div id="shotGrid" class="popup-grid"></div><button class="big-btn ghost" style="width:100%;margin-top:16px" data-close="shotModal">ZAVŘÍT</button></div></div>
+
+<div class="popup-backdrop" id="paymentModal"><div class="payment-modal"><h2>Způsob platby</h2><div class="payment-buttons"><button class="primary" id="payCashBtn" type="button" onclick="choosePaymentSafe(\'cash\')">HOTOVĚ</button><button class="blue" id="payQrBtn" type="button" onclick="showQrPreview(window.lastPendingAmount || getCurrentPaymentAmount())">QR</button></div><button class="big-btn ghost" style="width:100%;margin-top:14px" data-close="paymentModal">ZPĚT</button></div></div>
+
+
+<div class="popup-backdrop" id="qrPreviewModal">
+  <div class="popup" style="max-width:420px;text-align:center;">
+    <h2 style="margin-top:0;">QR Platba</h2>
+    <div id="qrAmountPreview" style="font-size:42px;font-weight:900;margin:20px 0;color:#111827;">0 Kč</div>
+    <div style="background:#f3f4f6;border-radius:20px;padding:20px;margin-bottom:16px;">
+      <div style="width:220px;height:220px;background:white;border:3px dashed #9ca3af;border-radius:20px;margin:0 auto;display:flex;align-items:center;justify-content:center;font-weight:900;color:#6b7280;padding:20px;">
+        QR KÓD<br>SE DOPLNÍ<br>POZDĚJI
+      </div>
+    </div>
+    <div class="small" style="margin-bottom:16px;">
+      Zatím bez čísla účtu.<br>
+      Po doplnění účtu se zde bude generovat skutečný QR kód.
+    </div>
+    <button class="big-btn primary" style="width:100%" type="button" onclick="confirmQrPayment()">POTVRDIT ZAPLACENÍ</button>
+    <button class="big-btn ghost" style="width:100%;margin-top:10px" type="button" data-close="qrPreviewModal">ZAVŘÍT</button>
+  </div>
+</div>
+
+<div id="flash" class="flash"></div>
+
+
+
+<script type="module">
+  const firebaseConfig = {
+    apiKey: "AIzaSyBVG375wTkQkp7bfuQ7yXFdKniFEQ04aAI",
+    authDomain: "gastro1-c61d5.firebaseapp.com",
+    projectId: "gastro1-c61d5",
+    storageBucket: "gastro1-c61d5.firebasestorage.app",
+    messagingSenderId: "460537867842",
+    appId: "1:460537867842:web:81ce374a66ca85dad347db"
+  };
+
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import {
+    getFirestore,
+    doc,
+    getDoc,
+    setDoc,
+    onSnapshot,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  window.FIREBASE_READY = false;
+  window.FIREBASE_ERROR = null;
+
+  try {
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const stateRef = doc(db, "pos_system", "main_state");
+
+    window.firebaseSaveState = async function(state) {
+      if (!window.FIREBASE_READY || window.isApplyingRemoteState) return;
+      await setDoc(stateRef, {
+        ...state,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    };
+
+    window.firebaseStartSync = async function(onRemoteState) {
+      const firstSnap = await getDoc(stateRef);
+
+      if (!firstSnap.exists()) {
+        window.FIREBASE_READY = true;
+        if (window.getPOSStateForFirebase) {
+          await window.firebaseSaveState(window.getPOSStateForFirebase());
+        }
+      }
+
+      onSnapshot(stateRef, (snap) => {
+        window.FIREBASE_READY = true;
+        if (snap.exists()) onRemoteState(snap.data());
+      }, (error) => {
+        window.FIREBASE_ERROR = error.message;
+        console.error("Firebase sync error:", error);
+      });
+    };
+
+    window.FIREBASE_READY = true;
+  } catch (error) {
+    window.FIREBASE_ERROR = error.message;
+    console.warn("Firebase není aktivní:", error.message);
+  }
+
+  window.dispatchEvent(new Event("firebase-module-loaded"));
+</script>
+
+<script>
+const PASSWORD="123456";
+const PRODUCTS=[
+{id:"parek_v_rohliku",name:"Párek v rohlíku",price:30,category:"Jídlo",type:"food"},
+{id:"hermelin",name:"Hermelín",price:60,category:"Jídlo",type:"food"},
+{id:"burger",name:"Burger",price:230,category:"Jídlo",type:"food"},
+{id:"grilovane_maso",name:"Grilované maso",price:140,category:"Jídlo",type:"food"},
+{id:"palacinka",name:"Palačinka",price:40,category:"Jídlo",type:"food"},
+{id:"cep_menu",name:"🍺 Na čepu",price:0,category:"Nápoje",type:"drink"},
+{id:"piti_menu",name:"🥤 Pití",price:0,category:"Nápoje",type:"drink"},
+{id:"panaky_menu",name:"🥃 Panáky",price:0,category:"Nápoje",type:"drink"},
+{id:"cukrovinky_menu",name:"🍬 Cukrovinky",price:0,category:"Nápoje",type:"sweets"}
+];
+const SHOTS=[
+{id:"jeger",name:"Jägermeister",price:45},{id:"heffron",name:"Heffron",price:45},{id:"finska",name:"Finská",price:45},{id:"zelena",name:"Zelená",price:40},{id:"gin",name:"Gin",price:45},{id:"jack",name:"Jack Daniels",price:55},{id:"jameson",name:"Jameson",price:55},{id:"diplomatico",name:"Diplomatico",price:100}
+];
+
+let cart={};
+let customProducts={};
+let activeOrders=JSON.parse(localStorage.getItem("pos_clean_activeOrders")||"[]");
+let kitchenOrders=JSON.parse(localStorage.getItem("pos_clean_kitchenOrders")||"[]");
+let tickets=JSON.parse(localStorage.getItem("pos_clean_tickets")||"[]");
+let sales=JSON.parse(localStorage.getItem("pos_clean_sales")||"[]");
+let nextFoodNumber=Number(localStorage.getItem("pos_clean_nextFoodNumber")||"1");
+let activeTicketId=null;
+let activeTicketHistorySessionId=null;
+let activeTicketGroupId=null;
+let salesUnlocked=false;
+let pendingPayment=null;
+let isApplyingRemoteState=false;
+let firebaseSyncStarted=false;
+
+function byId(id){return document.getElementById(id)}
+function money(v){return v+" Kč"}
+function esc(t){return String(t||"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[ch]))}
+function nowText(d){return new Date(d).toLocaleString("cs-CZ")}
+function productById(id){return customProducts[id]||PRODUCTS.find(p=>p.id===id)}
+function getPOSStateForFirebase(){
+  return { activeOrders, kitchenOrders, tickets, sales, nextFoodNumber };
+}
+
+function saveLocalOnly(){
+  localStorage.setItem("pos_clean_activeOrders",JSON.stringify(activeOrders));
+  localStorage.setItem("pos_clean_kitchenOrders",JSON.stringify(kitchenOrders));
+  localStorage.setItem("pos_clean_tickets",JSON.stringify(tickets));
+  localStorage.setItem("pos_clean_sales",JSON.stringify(sales));
+  localStorage.setItem("pos_clean_nextFoodNumber",String(nextFoodNumber));
+}
+
+function applyPOSStateFromFirebase(data){
+  if(!data) return;
+  isApplyingRemoteState = true;
+
+  activeOrders = Array.isArray(data.activeOrders) ? data.activeOrders : [];
+  kitchenOrders = Array.isArray(data.kitchenOrders) ? data.kitchenOrders : [];
+  tickets = Array.isArray(data.tickets) ? data.tickets : [];
+  sales = Array.isArray(data.sales) ? data.sales : [];
+  nextFoodNumber = Number(data.nextFoodNumber || 1);
+
+  if(activeTicketId && !tickets.some(t=>t.id===activeTicketId)){
+    activeTicketId = null;
+  }
+
+  saveLocalOnly();
+  renderAll();
+  isApplyingRemoteState = false;
+}
+
+function save(){
+  saveLocalOnly();
+  if(window.firebaseSaveState && !isApplyingRemoteState){
+    window.firebaseSaveState(getPOSStateForFirebase()).catch(err=>{
+      console.warn("Firebase save failed:", err);
+      flash("Uloženo jen lokálně");
+    });
+  }
+}
+
+window.getPOSStateForFirebase = getPOSStateForFirebase;
+function flash(text){const el=byId("flash");el.textContent=text;el.style.display="block";clearTimeout(window.flashTimer);window.flashTimer=setTimeout(()=>el.style.display="none",1200)}
+function showModal(id){byId(id).style.display="flex"}
+function closeModal(id){byId(id).style.display="none"}
+
+function cartItems(){return Object.keys(cart).map(id=>{const p=productById(id);return{id,name:p.name,category:p.category,type:p.type,price:p.price,qty:cart[id],total:p.price*cart[id]}})}
+function cartTotal(){return cartItems().reduce((s,i)=>s+i.total,0)}
+function hasFood(items){return items.some(i=>i.type==="food")}
+function newFoodNumberIfNeeded(items){return hasFood(items)?nextFoodNumber++:null}
+function createKitchenOrder(parentId,note,foodNumber,items){const foodItems=items.filter(i=>i.type==="food");if(!foodItems.length)return;kitchenOrders.unshift({id:Date.now()+Math.floor(Math.random()*10000),parentId,note,foodNumber,createdAt:new Date().toISOString(),items:foodItems,total:foodItems.reduce((s,i)=>s+i.total,0)})}
+
+function showTab(tab){document.querySelectorAll(".screen").forEach(e=>e.classList.remove("active"));document.querySelectorAll(".tab-btn").forEach(e=>e.classList.remove("active"));byId("screen-"+tab).classList.add("active");document.querySelector('.tab-btn[data-tab="'+tab+'"]').classList.add("active");renderAll()}
+
+
+function ensureTicketGroups(ticket){
+  if(!ticket.groups) ticket.groups=[];
+}
+
+function startTicketGroup(ticket){
+  ensureTicketGroups(ticket);
+  const group={
+    id:Date.now()+Math.floor(Math.random()*10000),
+    createdAt:new Date().toISOString(),
+    items:[],
+    total:0
+  };
+  ticket.groups.unshift(group);
+  activeTicketGroupId=group.id;
+  return group;
+}
+
+function getActiveTicketGroup(ticket){
+  ensureTicketGroups(ticket);
+  let group=ticket.groups.find(g=>g.id===activeTicketGroupId);
+  if(!group) group=startTicketGroup(ticket);
+  return group;
+}
+
+function rebuildTicketFromGroups(ticket){
+  ensureTicketGroups(ticket);
+  ticket.items=[];
+  ticket.total=0;
+
+  ticket.groups.forEach(group=>{
+    group.total=group.items.reduce((s,i)=>s+i.total,0);
+    group.items.forEach(item=>{
+      const existing=ticket.items.find(i=>i.id===item.id);
+      if(existing){
+        existing.qty+=item.qty;
+        existing.total+=item.total;
+      }else{
+        ticket.items.push({...item});
+      }
+    });
+  });
+
+  ticket.total=ticket.items.reduce((s,i)=>s+i.total,0);
+  addToTicketHistory(ticket,item);
+}
+
+function addItemToTicketGroup(ticket,item){
+  const group=getActiveTicketGroup(ticket);
+  const existing=group.items.find(i=>i.id===item.id);
+
+  if(existing){
+    existing.qty+=item.qty;
+    existing.total+=item.total;
+  }else{
+    group.items.push({...item});
+  }
+
+  rebuildTicketFromGroups(ticket);
+  return group;
+}
+
+function addFoodItemToKitchenForGroup(ticket,group,item){
+  if(item.type!=="food") return;
+
+  if(!group.foodNumber){
+    group.foodNumber=nextFoodNumber++;
+  }
+
+  let kitchenOrder=kitchenOrders.find(k=>k.parentId===ticket.id && k.groupId===group.id);
+
+  if(!kitchenOrder){
+    kitchenOrder={
+      id:Date.now()+Math.floor(Math.random()*10000),
+      parentId:ticket.id,
+      groupId:group.id,
+      note:ticket.note,
+      foodNumber:group.foodNumber,
+      createdAt:new Date().toISOString(),
+      items:[],
+      total:0
+    };
+    kitchenOrders.unshift(kitchenOrder);
+  }
+
+  const existing=kitchenOrder.items.find(i=>i.id===item.id);
+  if(existing){
+    existing.qty+=item.qty;
+    existing.total+=item.total;
+  }else{
+    kitchenOrder.items.push({...item});
+  }
+
+  kitchenOrder.total=kitchenOrder.items.reduce((s,i)=>s+i.total,0);
+}
+
+function ticketGroupsHtml(ticket){
+  ensureTicketGroups(ticket);
+
+  const groupsWithItems = ticket.groups.filter(group => group.items && group.items.length);
+
+  if(!groupsWithItems.length){
+    if(!ticket.items || !ticket.items.length){
+      return '<div class="active-ticket-items">Zatím bez položek</div>';
+    }
+    return '<div class="active-ticket-items">'+ticket.items.map(i=>`<div><span>${i.qty}× ${esc(i.name)}</span><strong>${money(i.total)}</strong></div>`).join("")+'</div>';
+  }
+
+  return '<div class="active-ticket-items">'+groupsWithItems.map((group,index)=>{
+    const orderNumber=groupsWithItems.length-index;
+    const rows=group.items.map(i=>`<div class="ticket-group-row"><span>${i.qty}× ${esc(i.name)}</span><strong>${money(i.total)}</strong></div>`).join("");
+    return `<div class="ticket-group"><div class="ticket-group-title">Objednávka ${orderNumber}${group.foodNumber ? " / kuchyň #"+group.foodNumber : ""}</div>${rows}<div style="text-align:right;font-weight:900;margin-top:4px;">${money(group.total||0)}</div></div>`;
+  }).join("")+'</div>';
+}
+
+function addItemObjectToTicket(ticket,item){
+  addItemToTicketGroup(ticket,item);
+}
+
+
+function openShots(){
+let html="";
+SHOTS.forEach(s=>{
+  html+=`<div class="shot-item">
+    <div class="shot-name">${esc(s.name)}</div>
+    <div class="shot-buttons">
+      <button class="blue" data-shot="${s.id}" data-name="${esc(s.name)}" data-price="${s.price/2}" data-size="malý">MALÝ</button>
+      <button class="primary" data-shot="${s.id}" data-name="${esc(s.name)}" data-price="${s.price}" data-size="velký">VELKÝ</button>
+    </div>
+  </div>`;
+});
+byId("shotGrid").innerHTML=html;
+showModal("shotModal");
+bindDynamic();
+}
+
+function addProduct(id){
+if(id==="parek_v_rohliku"){showModal("parekModal");return}
+if(id==="cep_menu"){showModal("tapModal");return}
+if(id==="piti_menu"){showModal("drinkModal");return}
+if(id==="cukrovinky_menu"){showModal("candyModal");return}
+if(id==="panaky_menu"){openShots();return}
+
+const p=productById(id);
+if(!p)return;
+
+if(activeTicketId){
+  addCustomProduct(p.id,p.name,p.price,p.category,p.type);
+  return;
+}
+
+cart[id]=(cart[id]||0)+1;
+renderAll();
+}
+
+
+function addCustomProduct(id,name,price,category,type){
+const item={id,name,category,type,price,qty:1,total:price};
+
+if(activeTicketId){
+  const ticket=tickets.find(t=>t.id===activeTicketId);
+
+  if(!ticket){
+    activeTicketId=null;
+    activeTicketHistorySessionId=null;
+    renderAll();
+    return;
+  }
+
+  const existing=ticket.items.find(i=>i.id===id);
+
+  if(existing){
+    existing.qty+=1;
+    existing.total+=price;
+  }else{
+    ticket.items.push({...item});
+  }
+
+  ticket.total=ticket.items.reduce((s,i)=>s+i.total,0);
+
+  if(typeof addToTicketHistory === "function"){
+    addToTicketHistory(ticket,item);
+  }
+
+  if(type==="food"){
+    createKitchenOrder(ticket.id,ticket.note,nextFoodNumber++,[item]);
+  }
+
+  save();
+  renderAll();
+  flash("Přidáno na lístek "+ticket.note);
+  return;
+}
+
+customProducts[id]={id,name,price,category,type};
+cart[id]=(cart[id]||0)+1;
+renderAll();
+}
+
+function selectActiveTicket(id){
+activeTicketId=id;
+activeTicketHistorySessionId=null;
+activeTicketGroupId=null;
+save();
+renderAll();
+flash("Lístek otevřen");
+}
+
+function clearActiveTicket(){activeTicketId=null;activeTicketHistorySessionId=null;renderAll();flash("Lístek zavřen")}
+function createTicket(){
+const name=prompt("Zadej jméno pro lístek:");
+if(!name||!name.trim()){
+  alert("Musíš zadat jméno.");
+  return;
+}
+
+const items=cartItems();
+const ticket={
+  id:Date.now(),
+  note:name.trim(),
+  paid:false,
+  createdAt:new Date().toISOString(),
+  items:[],
+  groups:[],
+  total:0
+};
+
+tickets.unshift(ticket);
+activeTicketId=ticket.id;
+activeTicketGroupId=null;
+
+if(items.length){
+  const foodNumber=newFoodNumberIfNeeded(items);
+  const group=startTicketGroup(ticket);
+  if(foodNumber) group.foodNumber=foodNumber;
+  items.forEach(i=>addItemObjectToTicket(ticket,i));
+  createKitchenOrder(ticket.id,ticket.note,foodNumber,items);
+  cart={};
+}
+
+save();
+renderAll();
+flash("Lístek vytvořen");
+}
+
+function createPaidOrder(){const items=cartItems();if(!items.length){alert("Nejdřív vyber položky.");return}window.lastPendingAmount=cartTotal(); window.lastPendingAmount=cartTotal(); pendingPayment=method=>finishPaidOrder(method);showModal("paymentModal")}
+function finishPaidOrder(method){
+const items=cartItems();
+if(!items.length)return;
+
+const foodNumber=newFoodNumberIfNeeded(items);
+
+const order={
+  id:Date.now(),
+  foodNumber,
+  note:"",
+  paid:true,
+  paymentMethod:method,
+  createdAt:new Date().toISOString(),
+  items,
+  total:cartTotal()
+};
+
+activeOrders.unshift(order);
+sales.push(order);
+
+if(foodNumber){
+  createKitchenOrder(order.id,order.note,foodNumber,items);
+}
+
+cart={};
+save();
+renderAll();
+flash(foodNumber ? "Objednávka jídla #"+foodNumber : "Objednávka zaplacena");
+}
+
+function payTicket(id){const t=tickets.find(x=>x.id===id);if(!t)return;rebuildTicketFromGroups(t);if(!t.items.length){alert("Lístek je prázdný.");return}window.lastPendingAmount=t.total; window.lastPendingAmount=t.total; pendingPayment=method=>{t.paid=true;sales.push({...t,paymentMethod:method,paidAt:new Date().toISOString()});tickets=tickets.filter(x=>x.id!==id);if(activeTicketId===id){activeTicketId=null;activeTicketGroupId=null;}save();renderAll();flash("Lístek zaplacen")};showModal("paymentModal")}
+function deleteTicket(id){if(!confirm("Smazat lístek?"))return;tickets=tickets.filter(t=>t.id!==id);kitchenOrders=kitchenOrders.filter(k=>k.parentId!==id);if(activeTicketId===id){activeTicketId=null;activeTicketGroupId=null;}save();renderAll()}
+function markOrderDone(id){activeOrders=activeOrders.filter(o=>o.id!==id);save();renderAll()}
+function deleteOrderMistake(id){if(!confirm("Smazat objednávku jako omyl?"))return;activeOrders=activeOrders.filter(o=>o.id!==id);sales=sales.filter(s=>s.id!==id);kitchenOrders=kitchenOrders.filter(k=>k.parentId!==id);save();renderAll()}
+function kitchenDone(id){kitchenOrders=kitchenOrders.filter(o=>o.id!==id);save();renderAll()}
+
+
+function getSelectedQtyForProduct(id){
+  if(activeTicketId){
+    const ticket = tickets.find(t=>t.id===activeTicketId);
+    if(!ticket || !ticket.items) return 0;
+    const item = ticket.items.find(i=>i.id===id);
+    return item ? item.qty : 0;
+  }
+  return cart[id] || 0;
+}
+
+function renderProducts(targetId,types){
+const products=PRODUCTS.filter(p=>types.includes(p.type));
+const categories=[...new Set(products.map(p=>p.category))];
+let html="";
+
+categories.forEach(cat=>{
+  html+=`<div class="category-title">${esc(cat)}</div><div class="product-grid">`;
+
+  products.filter(p=>p.category===cat).forEach(p=>{
+    const qty=getSelectedQtyForProduct(p.id);
+    html+=`
+      <button class="product-btn ${p.type}" onclick="addProduct('${p.id}')">
+        ${qty>0?`<div class="product-qty">${qty}</div>`:""}
+        <div class="product-name">${esc(p.name)}</div>
+        <div class="product-price">${p.price?money(p.price):"Vybrat"}</div>
+      </button>
+    `;
+  });
+
+  html+="</div>";
+});
+
+byId(targetId).innerHTML=html;
+}
+
+function renderCart(targetId){
+if(activeTicketId){
+  byId(targetId).innerHTML='<div class="ticket-help">Kliknutím na položky vlevo je přidáváš rovnou na aktivní lístek.</div>';
+  return;
+}
+
+const items=cartItems();
+
+byId(targetId).innerHTML=items.length
+  ? items.map(i=>`
+    <div class="cart-item" style="grid-template-columns:1fr;">
+      <div>
+        <strong>${i.qty}× ${esc(i.name)}</strong><br>
+        <span class="small">${money(i.total)}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+        <button class="ghost" style="min-height:52px;border-radius:14px;font-size:16px;" data-cart-action="minus" data-cart-id="${esc(i.id)}">ODEBRAT 1</button>
+        <button class="blue" style="min-height:52px;border-radius:14px;font-size:16px;" data-cart-action="plus" data-cart-id="${esc(i.id)}">PŘIDAT 1</button>
+      </div>
+    </div>
+  `).join("")
+  : '<div class="empty">Košík je prázdný</div>';
+}
+
+
+
+function recalcTicket(ticket){
+  ticket.total = ticket.items.reduce((s,i)=>s+i.total,0);
+}
+
+function editActiveTicketItem(itemId, delta){
+  const ticket = tickets.find(t=>t.id===activeTicketId);
+  if(!ticket) return;
+
+  const item = ticket.items.find(i=>i.id===itemId);
+  if(!item) return;
+
+  item.qty = Math.max(0, item.qty + delta);
+  item.total = item.qty * item.price;
+
+  if(item.qty === 0){
+    ticket.items = ticket.items.filter(i=>i.id!==itemId);
+  }
+
+  recalcTicket(ticket);
+  save();
+  renderAll();
+}
+
+
+function ensureTicketHistory(ticket){
+  if(!ticket.history) ticket.history=[];
+}
+
+function getCurrentHistoryGroup(ticket){
+  ensureTicketHistory(ticket);
+
+  let group = ticket.history.find(g=>g.id===activeTicketHistorySessionId);
+
+  if(!group){
+    group = {
+      id: Date.now()+Math.floor(Math.random()*10000),
+      createdAt: new Date().toISOString(),
+      items: [],
+      total: 0
+    };
+    ticket.history.unshift(group);
+    activeTicketHistorySessionId = group.id;
+  }
+
+  return group;
+}
+
+function addToTicketHistory(ticket,item){
+  const group = getCurrentHistoryGroup(ticket);
+  const existing = group.items.find(i=>i.id===item.id);
+
+  if(existing){
+    existing.qty += item.qty;
+    existing.total += item.total;
+  }else{
+    group.items.push({...item});
+  }
+
+  group.total = group.items.reduce((s,i)=>s+i.total,0);
+}
+
+function ticketHistoryHtml(ticket){
+  ensureTicketHistory(ticket);
+
+  const groups = ticket.history.filter(g=>g.items && g.items.length);
+
+  if(!groups.length){
+    return '<div class="ticket-history">Historie zatím prázdná</div>';
+  }
+
+  return '<div class="ticket-history">'+groups.map((group,index)=>{
+    const orderNumber = groups.length-index;
+    const rows = group.items.map(i=>`<div class="ticket-history-row"><span>${i.qty}× ${esc(i.name)}</span><strong>${money(i.total)}</strong></div>`).join("");
+    return `<div class="ticket-history-group"><div class="ticket-history-title">Objednávka ${orderNumber}</div>${rows}<div style="text-align:right;font-weight:900;margin-top:4px;">${money(group.total||0)}</div></div>`;
+  }).join("")+'</div>';
+}
+
+
+function activeTicketItemsHtml(t){
+  if(!t || !t.items || !t.items.length){
+    return '<div class="active-ticket-items">Zatím bez položek</div>';
+  }
+
+  const history = ticketHistoryHtml(t);
+
+  const editList = '<div class="active-ticket-items"><div style="font-weight:900;color:#111827;margin-bottom:6px;">Celkem na lístku / úprava položek</div>'+t.items.map(i=>{
+    const safeId = JSON.stringify(i.id);
+    return `
+      <div style="display:block;border-bottom:1px solid #e5e7eb;padding:8px 0;">
+        <div style="display:flex;justify-content:space-between;gap:8px;">
+          <span>${i.qty}× ${esc(i.name)}</span>
+          <strong>${money(i.total)}</strong>
+        </div>
+        ${typeof editActiveTicketItem === "function" ? `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+          <button class="ghost" style="min-height:44px;border-radius:12px;font-size:14px;" type="button" onclick='editActiveTicketItem(${safeId}, -1)'>ODEBRAT 1</button>
+          <button class="blue" style="min-height:44px;border-radius:12px;font-size:14px;" type="button" onclick='editActiveTicketItem(${safeId}, 1)'>PŘIDAT 1</button>
+        </div>` : ""}
+      </div>
+    `;
+  }).join("")+'</div>';
+
+  return history + editList;
+}
+
+function renderActiveBanner(){
+const t=tickets.find(x=>x.id===activeTicketId);
+const html=t?`<div class="active-banner">
+  <div class="active-title">PŘIDÁVÁŠ ROVNOU NA LÍSTEK</div>
+  <div class="active-name">${esc(t.note)}</div>
+  <div class="active-total">${money(t.total)}</div>
+  ${activeTicketItemsHtml(t)}
+  <button class="big-btn ghost clearActiveTicketBtn" style="width:100%" type="button">ZAVŘÍT LÍSTEK</button>
+</div>`:"";
+byId("activeTicketBannerFood").innerHTML=html;
+byId("activeTicketBannerDrinks").innerHTML=html;
+}
+
+function renderQuickTickets(){
+const html=tickets.length?'<div class="ticket-grid">'+tickets.map(t=>{
+  const isActive = t.id===activeTicketId;
+  return `<div class="ticket-tile ${isActive?'active':''}">
+    <div>
+      <div class="ticket-tile-name">${esc(t.note)}</div>
+      <div class="ticket-tile-total">${money(t.total)}</div>
+      <div class="ticket-tile-status">${isActive?'AKTIVNÍ LÍSTEK':'NEAKTIVNÍ'}</div>
+    </div>
+    <div class="tile-actions">
+      ${isActive
+        ? `<button class="ghost" type="button" onclick="clearActiveTicket()">ZAVŘÍT</button>`
+        : `<button class="primary" type="button" data-select-ticket="${t.id}">OTEVŘÍT</button>`
+      }
+    </div>
+  </div>`;
+}).join("")+'</div>':'<div class="empty">Žádné lístky</div>';
+byId("quickTicketsFood").innerHTML=html;
+byId("quickTicketsDrinks").innerHTML=html;
+}
+
+function renderActiveOrders(){const html=activeOrders.length?activeOrders.map(o=>`<div class="order-card"><div class="card-head"><span>${o.foodNumber?`<span class="food-number">#${o.foodNumber}</span>`:'Bez čísla'}</span><span>${money(o.total)}</span></div><div class="small">${nowText(o.createdAt)} • zaplaceno</div><ul>${o.items.map(i=>`<li>${i.qty}× ${esc(i.name)} – ${money(i.total)}</li>`).join("")}</ul><div class="row-actions"><button class="yellow" data-order-done="${o.id}">HOTOVO</button><button class="danger" data-order-mistake="${o.id}">OMYL</button></div></div>`).join(""):'<div class="empty">Žádné objednávky</div>';byId("activeOrdersFood").innerHTML=html;byId("activeOrdersDrinks").innerHTML=html}
+function renderKitchen(){if(!kitchenOrders.length){byId("kitchenOrders").innerHTML='<div class="empty">Kuchyň nemá žádné objednávky</div>';return}byId("kitchenOrders").innerHTML='<div class="kitchen-grid">'+kitchenOrders.map(o=>`<div class="kitchen-card"><div class="card-head"><span>${o.foodNumber?`<span class="food-number">#${o.foodNumber}</span>`:esc(o.note||"Jídlo")}</span><span>${esc(o.note||"")}</span></div><div class="small">${nowText(o.createdAt)}</div><ul>${o.items.map(i=>`<li>${i.qty}× ${esc(i.name)}</li>`).join("")}</ul><button class="big-btn primary" style="width:100%" data-kitchen-done="${o.id}">HOTOVO</button></div>`).join("")+'</div>'}
+function renderTicketsFull(){byId("ticketsList").innerHTML=tickets.length?tickets.map(t=>`<div class="ticket-card ${t.id===activeTicketId?'active':''}"><div class="card-head"><span>${esc(t.note)}</span><span>${money(t.total)}</span></div><div class="small">Nezaplaceno</div>${activeTicketItemsHtml(t)}<div class="row-actions" style="grid-template-columns:1fr 1fr; margin-top:10px;">
+<button class="blue" data-select-ticket="${t.id}">Otevřít</button>
+<button class="ghost close-ticket-btn" type="button" onclick="clearActiveTicket()">Zavřít lístek</button>
+</div>
+<div class="row-actions" style="grid-template-columns:1fr 1fr; margin-top:8px;">
+<button class="primary" data-pay-ticket="${t.id}">Zaplatit</button>
+<button class="danger" data-delete-ticket="${t.id}">Smazat</button>
+</div></div>`).join(""):'<div class="empty">Žádné nezaplacené lístky</div>'}
+function renderSales(){
+if(!salesUnlocked)return;
+
+const total=sales.reduce((s,o)=>s+o.total,0);
+const cash=sales.filter(o=>o.paymentMethod==="cash").reduce((s,o)=>s+o.total,0);
+const qr=sales.filter(o=>o.paymentMethod==="qr").reduce((s,o)=>s+o.total,0);
+
+byId("salesTotal").textContent=money(total);
+
+const summary={};
+sales.forEach(o=>o.items.forEach(i=>{
+  if(!summary[i.id])summary[i.id]={name:i.name,category:i.category,qty:0,total:0};
+  summary[i.id].qty+=i.qty;
+  summary[i.id].total+=i.total;
+}));
+
+const rows=Object.values(summary).sort((a,b)=>a.category.localeCompare(b.category)||a.name.localeCompare(b.name));
+
+const paymentHtml=`<div class="card" style="box-shadow:none;background:#f9fafb;margin:10px 0;padding:10px">
+  <strong>Hotově:</strong> ${money(cash)}<br>
+  <strong>QR:</strong> ${money(qr)}<br>
+  <strong>Celkem:</strong> ${money(total)}
+</div>`;
+
+const summaryHtml=rows.length
+  ? `<h3 style="margin:14px 0 8px;">Souhrn položek</h3>
+    <table>
+      <thead><tr><th>Kategorie</th><th>Položka</th><th>Ks</th><th>Celkem</th></tr></thead>
+      <tbody>${rows.map(r=>`<tr><td>${esc(r.category)}</td><td>${esc(r.name)}</td><td>${r.qty}</td><td>${money(r.total)}</td></tr>`).join("")}</tbody>
+    </table>`
+  : '<div class="empty">Zatím žádný prodej</div>';
+
+const ordersHtml=sales.length
+  ? `<h3 style="margin:18px 0 8px;">Jednotlivé objednávky</h3>`+
+    sales.slice().reverse().map((o,index)=>{
+      const payment=o.paymentMethod==="qr"?"QR":"Hotově";
+      const title=o.note ? esc(o.note) : (o.foodNumber ? "Objednávka #"+o.foodNumber : "Objednávka");
+      const items=o.items.map(i=>`<li>${i.qty}× ${esc(i.name)} – ${money(i.total)}</li>`).join("");
+      return `<div class="sales-order-card">
+        <div class="sales-order-head">
+          <span>${title}</span>
+          <span>${money(o.total)}</span>
+        </div>
+        <div class="small">${nowText(o.paidAt || o.createdAt)} • ${payment}</div>
+        <ul class="sales-order-items">${items}</ul>
+      </div>`;
+    }).join("")
+  : "";
+
+byId("salesSummary").innerHTML=paymentHtml+summaryHtml;
+}
+function unlockSales(){if(byId("salesPassword").value!==PASSWORD){alert("Špatné heslo.");return}salesUnlocked=true;byId("salesLogin").style.display="none";byId("salesPanel").style.display="block";renderSales()}
+function lockSales(){salesUnlocked=false;byId("salesPassword").value="";byId("salesLogin").style.display="block";byId("salesPanel").style.display="none"}
+function downloadCSV(){if(!salesUnlocked){alert("Nejdřív zadej heslo.");return}const lines=[["Čas","Platba","Číslo jídla","Jméno/lístek","Kategorie","Položka","Ks","Cena za kus","Celkem"]];sales.forEach(o=>o.items.forEach(i=>lines.push([nowText(o.createdAt),o.paymentMethod==="qr"?"QR":"Hotově",o.foodNumber?("#"+o.foodNumber):"",o.note||"",i.category,i.name,i.qty,i.price,i.total])));const csv=lines.map(row=>row.map(cell=>'"'+String(cell).replace(/"/g,'""')+'"').join(";")).join("\n");const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="prehled-prodeje.csv";a.click();URL.revokeObjectURL(url)}
+function resetAll(){if(!salesUnlocked){alert("Nejdřív zadej heslo.");return}if(!confirm("Opravdu vynulovat vše?"))return;cart={};customProducts={};activeOrders=[];kitchenOrders=[];tickets=[];sales=[];nextFoodNumber=1;activeTicketId=null;activeTicketGroupId=null;save();renderAll();flash("Vše resetováno")}
+function updateModeButtons(){const inTicket=!!activeTicketId;["actionsFood","actionsDrinks"].forEach(id=>byId(id).style.display=inTicket?"none":"grid");byId("cartLabelFood").textContent=inTicket?"Lístek":"Celkem";byId("cartLabelDrinks").textContent=inTicket?"Lístek":"Celkem"}
+
+
+function getSelectedQtyForId(id){
+  if(activeTicketId){
+    const ticket = tickets.find(t=>t.id===activeTicketId);
+    if(!ticket || !ticket.items) return 0;
+    const item = ticket.items.find(i=>i.id===id);
+    return item ? item.qty : 0;
+  }
+
+  return cart[id] || 0;
+}
+
+function updatePopupCounts(){
+  document.querySelectorAll(".popup-count").forEach(el=>el.remove());
+
+  document.querySelectorAll("[data-simple]").forEach(btn=>{
+    try{
+      const item = JSON.parse(btn.dataset.simple);
+      const qty = getSelectedQtyForId(item.id);
+
+      if(qty > 0){
+        const badge = document.createElement("span");
+        badge.className = "popup-count";
+        badge.textContent = qty;
+        btn.appendChild(badge);
+      }
+    }catch(e){}
+  });
+
+  document.querySelectorAll("[data-shot]").forEach(btn=>{
+    const id = btn.dataset.shot + "_" + btn.dataset.size;
+    const qty = getSelectedQtyForId(id);
+
+    if(qty > 0){
+      const badge = document.createElement("span");
+      badge.className = "popup-count";
+      badge.textContent = qty;
+      btn.appendChild(badge);
+    }
+  });
+}
+
+
+function renderAll(){renderProducts("foodProducts",["food"]);renderProducts("drinkProducts",["drink","sweets"]);renderCart("cartListFood");renderCart("cartListDrinks");const t=tickets.find(x=>x.id===activeTicketId);const total=money(t?t.total:cartTotal());byId("cartTotalFood").textContent=total;byId("cartTotalDrinks").textContent=total;renderActiveBanner();renderQuickTickets();renderActiveOrders();renderKitchen();renderTicketsFull();renderSales();updateModeButtons();bindDynamic();updatePopupCounts()}
+
+
+function clearCartSafe(){
+  cart = {};
+  renderAll();
+  flash("Košík vymazán");
+}
+
+function choosePaymentSafe(method){
+  closeModal("paymentModal");
+  if(typeof pendingPayment === "function"){
+    const fn = pendingPayment;
+    pendingPayment = null;
+    fn(method);
+  }else{
+    alert("Není rozpracovaná žádná platba.");
+  }
+}
+
+
+
+function getCurrentPaymentAmount(){
+  if(window.lastPendingAmount) return window.lastPendingAmount;
+
+  if(activeTicketId){
+    const ticket = tickets.find(t=>t.id===activeTicketId);
+    return ticket ? ticket.total : 0;
+  }
+
+  return cartTotal();
+}
+
+function showQrPreview(amount){
+  const finalAmount = amount || getCurrentPaymentAmount() || 0;
+  const amountEl = byId("qrAmountPreview");
+  if(amountEl) amountEl.textContent = money(finalAmount);
+  closeModal("paymentModal");
+  showModal("qrPreviewModal");
+}
+
+function choosePaymentSafe(method){
+  closeModal("paymentModal");
+
+  if(typeof pendingPayment === "function"){
+    const fn = pendingPayment;
+    pendingPayment = null;
+    window.lastPendingAmount = 0;
+    fn(method);
+  }else{
+    alert("Není rozpracovaná žádná platba.");
+  }
+}
+
+function confirmQrPayment(){
+  closeModal("qrPreviewModal");
+  choosePaymentSafe("qr");
+}
+
+
+function bindDynamic(){
+document.querySelectorAll("[data-add-product]").forEach(function(b){
+  b.onclick=function(){ addProduct(b.dataset.addProduct); };
+});
+
+document.querySelectorAll("[data-change-id]").forEach(function(b){
+  b.onclick=function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    changeQty(b.dataset.changeId, Number(b.dataset.delta));
+  };
+});
+
+document.querySelectorAll("[data-select-ticket]").forEach(function(b){
+  b.onclick=function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    selectActiveTicket(Number(b.dataset.selectTicket));
+  };
+});
+
+document.querySelectorAll("[data-pay-ticket]").forEach(function(b){
+  b.onclick=function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    payTicket(Number(b.dataset.payTicket));
+  };
+});
+
+document.querySelectorAll("[data-delete-ticket]").forEach(function(b){
+  b.onclick=function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    deleteTicket(Number(b.dataset.deleteTicket));
+  };
+});
+
+document.querySelectorAll("[data-order-done]").forEach(function(b){
+  b.onclick=function(){ markOrderDone(Number(b.dataset.orderDone)); };
+});
+
+document.querySelectorAll("[data-order-mistake]").forEach(function(b){
+  b.onclick=function(){ deleteOrderMistake(Number(b.dataset.orderMistake)); };
+});
+
+document.querySelectorAll("[data-kitchen-done]").forEach(function(b){
+  b.onclick=function(){ kitchenDone(Number(b.dataset.kitchenDone)); };
+});
+
+document.querySelectorAll(".clearActiveTicketBtn,#clearActiveTicketBtn").forEach(function(b){
+  b.onclick=function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    clearActiveTicket();
+  };
+});
+
+document.querySelectorAll("[data-parek]").forEach(function(b){
+  b.onclick=function(){
+    closeModal("parekModal");
+    addCustomProduct(
+      "parek_"+b.dataset.parek.replaceAll(" ","_"),
+      "Párek v rohlíku - "+b.dataset.parek,
+      30,
+      "Jídlo",
+      "food"
+    );
+  };
+});
+
+document.querySelectorAll("[data-simple]").forEach(function(b){
+  b.onclick=function(){
+    const item=JSON.parse(b.dataset.simple);
+    addCustomProduct(item.id,item.name,item.price,item.category,item.type);
+  };
+});
+
+document.querySelectorAll("[data-shot]").forEach(function(b){
+  b.onclick=function(){
+    addCustomProduct(
+      b.dataset.shot+"_"+b.dataset.size,
+      b.dataset.name+" - "+b.dataset.size,
+      Number(b.dataset.price),
+      "Panáky",
+      "drink"
+    );
+  };
+});
+
+document.querySelectorAll("[data-close]").forEach(function(b){
+  b.onclick=function(){ closeModal(b.dataset.close); };
+});
+}
+
+
+function updateSyncStatus(){
+  const el = byId("syncStatus");
+  if(!el) return;
+  if(window.FIREBASE_ERROR){
+    el.textContent = "• Firebase chyba";
+    el.style.color = "#fca5a5";
+  }else if(window.FIREBASE_READY){
+    el.textContent = "• online sync";
+    el.style.color = "#86efac";
+  }else{
+    el.textContent = "• lokálně";
+    el.style.color = "#d1d5db";
+  }
+}
+
+function startFirebaseSyncIfReady(){
+  if(firebaseSyncStarted) return;
+  if(window.firebaseStartSync){
+    firebaseSyncStarted = true;
+    window.firebaseStartSync(applyPOSStateFromFirebase).catch(err=>{
+      window.FIREBASE_ERROR = err.message;
+      updateSyncStatus();
+    });
+  }
+  updateSyncStatus();
+}
+
+
+function bindStatic(){
+
+
+document.querySelectorAll(".tab-btn").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+byId("paidBtnFood").onclick=createPaidOrder;byId("paidBtnDrinks").onclick=createPaidOrder;
+byId("ticketBtnFood").onclick=createTicket;byId("ticketBtnDrinks").onclick=createTicket;
+byId("clearBtnFood").onclick=clearCartSafe;byId("clearBtnDrinks").onclick=clearCartSafe;
+byId("unlockSalesBtn").onclick=unlockSales;byId("lockSalesBtn").onclick=lockSales;byId("csvBtn").onclick=downloadCSV;byId("resetBtn").onclick=resetAll;
+byId("payCashBtn").onclick=()=>choosePaymentSafe("cash");
+byId("payQrBtn").onclick=()=>showQrPreview(window.lastPendingAmount || getCurrentPaymentAmount());
+["parekModal","tapModal","drinkModal","candyModal","shotModal","paymentModal"].forEach(id=>{const el=byId(id);el.addEventListener("click",e=>{if(e.target===el)closeModal(id)})});
+}
+
+document.addEventListener("click", function(e){
+  const btn = e.target.closest("[data-cart-action]");
+  if(!btn) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  const id = btn.dataset.cartId;
+  const action = btn.dataset.cartAction;
+
+  if(action === "minus"){
+    cart[id] = Math.max(0, (cart[id] || 0) - 1);
+    if(cart[id] === 0) delete cart[id];
+    renderAll();
+    return;
+  }
+
+  if(action === "plus"){
+    cart[id] = (cart[id] || 0) + 1;
+    renderAll();
+    return;
+  }
+}, true);
+
+
+window.addEventListener("DOMContentLoaded",()=>{
+  bindStatic();
+  renderAll();
+  startFirebaseSyncIfReady();
+});
+
+window.addEventListener("firebase-module-loaded", ()=>{
+  startFirebaseSyncIfReady();
+  updateSyncStatus();
+});
+
+setInterval(updateSyncStatus, 2000);
+</script>
+</body>
+</html>
