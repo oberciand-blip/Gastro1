@@ -68,7 +68,7 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}th,td{b
 .modal h3{margin-top:0;font-size:28px;text-align:center}.modal-buttons{display:grid;gap:12px}.modal-buttons button{min-height:72px;border-radius:20px;font-size:24px}
 .popup-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:1200}
 .popup{background:white;border-radius:24px;width:min(95vw,700px);max-height:90vh;overflow:auto;padding:20px}
-.popup-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.popup-grid button{min-height:82px;border-radius:18px;font-size:22px;font-weight:900;color:white;padding:10px}
+.popup-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.popup-grid button{min-height:82px;border-radius:18px;font-size:22px;font-weight:900;color:white;padding:10px}
 .tap-btn{background:#1e3a8a}.drink-btn{background:#2563eb}.candy-btn{background:#9333ea}.shot-item{background:#f3f4f6;border-radius:18px;padding:12px}.shot-name{font-size:20px;font-weight:900;margin-bottom:10px;text-align:center}.shot-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}.shot-buttons button{min-height:64px;border-radius:14px;font-size:22px}
 .payment-modal{background:white;border-radius:24px;width:min(92vw,460px);padding:22px;box-shadow:0 20px 40px rgba(0,0,0,.3)}
 .payment-modal h2{margin:0 0 16px;text-align:center;font-size:30px}.payment-buttons{display:grid;grid-template-columns:1fr 1fr;gap:12px}.payment-buttons button{min-height:86px;border-radius:20px;font-size:26px}
@@ -286,9 +286,26 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}th,td{b
 
 <div class="modal-backdrop" id="parekModal"><div class="modal"><h3>Párek v rohlíku</h3><div class="modal-buttons"><button class="primary" data-parek="kečup">KEČUP</button><button class="yellow" data-parek="hořčice">HOŘČICE</button><button class="ghost" data-parek="bez ničeho">BEZ NIČEHO</button></div></div></div>
 
-<div class="popup-backdrop" id="tapModal"><div class="popup"><h2 style="margin-top:0;text-align:center;font-size:32px">🍺 Na čepu</h2><div class="popup-grid"><button class="tap-btn" data-simple='{"id":"pivo","name":"Pivo","price":45,"category":"Na čepu","type":"drink"}'>Pivo<br>45 Kč</button><button class="tap-btn" data-simple='{"id":"birell","name":"Birell","price":45,"category":"Na čepu","type":"drink"}'>Birell<br>45 Kč</button><button class="tap-btn" data-simple='{"id":"malinovka","name":"Malinovka","price":35,"category":"Na čepu","type":"drink"}'>Malinovka<br>35 Kč</button></div><button class="big-btn ghost" style="width:100%;margin-top:16px" data-close="tapModal">ZAVŘÍT</button></div></div>
+<div class="modal-backdrop" id="palacinkaModal"><div class="modal"><h3>Palačinka</h3><div class="modal-buttons"><button class="primary" data-palacinka="Nutella">NUTELLA</button><button class="yellow" data-palacinka="Marmeláda">MARMELÁDA</button></div></div></div>
 
-<div class="popup-backdrop" id="drinkModal"><div class="popup"><h2 style="margin-top:0;text-align:center;font-size:32px">🥤 Pití</h2><div class="popup-grid"><button class="drink-btn" data-simple='{"id":"voda","name":"Voda","price":20,"category":"Pití","type":"drink"}'>Voda<br>20 Kč</button><button class="drink-btn" data-simple='{"id":"kava","name":"Káva","price":30,"category":"Pití","type":"drink"}'>Káva<br>30 Kč</button><button class="drink-btn" data-simple='{"id":"redbull","name":"Red Bull","price":50,"category":"Pití","type":"drink"}'>Red Bull<br>50 Kč</button><button class="drink-btn" data-simple='{"id":"dzinus","name":"Džus","price":40,"category":"Pití","type":"drink"}'>Džus<br>40 Kč</button></div><button class="big-btn ghost" style="width:100%;margin-top:16px" data-close="drinkModal">ZAVŘÍT</button></div></div>
+<div class="popup-backdrop" id="tapModal"><div class="popup"><h2 style="margin-top:0;text-align:center;font-size:32px">🍺 Na čepu</h2><div class="popup-grid">
+<div style="grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+<button class="tap-btn" data-simple='{"id":"radegast10","name":"Radegast 10°","price":45,"category":"Na čepu","type":"drink"}'>Radegast 10°<br>45 Kč</button>
+<button class="tap-btn" data-simple='{"id":"radegast12","name":"Radegast 12°","price":50,"category":"Na čepu","type":"drink"}'>Radegast 12°<br>50 Kč</button>
+</div>
+<div style="grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+<button class="tap-btn" data-simple='{"id":"birell","name":"Birell","price":45,"category":"Na čepu","type":"drink"}'>Birell<br>45 Kč</button>
+<button class="tap-btn" data-simple='{"id":"malinovka","name":"Malinovka","price":40,"category":"Na čepu","type":"drink"}'>Malinovka<br>40 Kč</button>
+</div>
+</div><button class="big-btn ghost" style="width:100%;margin-top:16px" data-close="tapModal">ZAVŘÍT</button></div></div>
+
+<div class="popup-backdrop" id="drinkModal"><div class="popup"><h2 style="margin-top:0;text-align:center;font-size:32px">🥤 Pití</h2><div class="popup-grid"><button class="drink-btn" data-simple='{"id":"voda","name":"Voda","price":25,"category":"Pití","type":"drink"}'>Voda<br>25 Kč</button><button class="drink-btn" data-simple='{"id":"kava","name":"Káva","price":30,"category":"Pití","type":"drink"}'>Káva<br>30 Kč</button><button class="drink-btn" data-simple='{"id":"cocacola","name":"Coca Cola","price":30,"category":"Pití","type":"drink"}'>Coca Cola<br>30 Kč</button><button class="drink-btn" data-simple='{"id":"tonic","name":"Tonic","price":30,"category":"Pití","type":"drink"}'>Tonic<br>30 Kč</button><button class="drink-btn" data-simple='{"id":"redbull","name":"Red Bull","price":50,"category":"Pití","type":"drink"}'>Red Bull<br>50 Kč</button><button class="drink-btn" data-simple='{"id":"dzinus","name":"Džus","price":40,"category":"Pití","type":"drink"}'>Džus<br>40 Kč</button></div><button class="big-btn ghost" style="width:100%;margin-top:16px" data-close="drinkModal">ZAVŘÍT</button></div></div>
+
+
+<div class="popup-backdrop" id="specialModal"><div class="popup"><h2 style="margin-top:0;text-align:center;font-size:32px">🍹 Speciál</h2><div class="popup-grid">
+<button class="drink-btn" data-simple='{"id":"aperol_spritz","name":"Aperol Spritz","price":80,"category":"Speciál","type":"drink"}'>Aperol Spritz<br>80 Kč</button>
+<button class="drink-btn" data-simple='{"id":"prosecco","name":"Prosecco 1,5 dcl","price":56,"category":"Speciál","type":"drink"}'>Prosecco 1,5 dcl<br>56 Kč</button>
+</div><button class="big-btn ghost" style="width:100%;margin-top:16px" data-close="specialModal">ZAVŘÍT</button></div></div>
 
 <div class="popup-backdrop" id="candyModal"><div class="popup"><h2 style="margin-top:0;text-align:center;font-size:32px">🍬 Cukrovinky</h2><div class="popup-grid"><button class="candy-btn" data-simple='{"id":"brumik","name":"Brumík","price":15,"category":"Cukrovinky","type":"sweets"}'>Brumík<br>15 Kč</button><button class="candy-btn" data-simple='{"id":"tycinky","name":"Tyčinky","price":20,"category":"Cukrovinky","type":"sweets"}'>Tyčinky<br>20 Kč</button><button class="candy-btn" data-simple='{"id":"pendrek","name":"Pendrek","price":5,"category":"Cukrovinky","type":"sweets"}'>Pendrek<br>5 Kč</button><button class="candy-btn" data-simple='{"id":"zele_mys","name":"Želé myš","price":5,"category":"Cukrovinky","type":"sweets"}'>Želé myš<br>5 Kč</button></div><button class="big-btn ghost" style="width:100%;margin-top:16px" data-close="candyModal">ZAVŘÍT</button></div></div>
 
@@ -387,17 +404,17 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}th,td{b
 const PASSWORD="123456";
 const PRODUCTS=[
 {id:"parek_v_rohliku",name:"Párek v rohlíku",price:30,category:"Jídlo",type:"food"},
-{id:"hermelin",name:"Hermelín",price:60,category:"Jídlo",type:"food"},
+{id:"hermelin",name:"Hermelín",price:80,category:"Jídlo",type:"food"},
 {id:"burger",name:"Burger",price:230,category:"Jídlo",type:"food"},
 {id:"grilovane_maso",name:"Grilované maso",price:140,category:"Jídlo",type:"food"},
 {id:"palacinka",name:"Palačinka",price:40,category:"Jídlo",type:"food"},
 {id:"cep_menu",name:"🍺 Na čepu",price:0,category:"Nápoje",type:"drink"},
 {id:"piti_menu",name:"🥤 Pití",price:0,category:"Nápoje",type:"drink"},
-{id:"panaky_menu",name:"🥃 Panáky",price:0,category:"Nápoje",type:"drink"},
+{id:"panaky_menu",name:"🥃 Panáky",price:0,category:"Nápoje",type:"drink"},{id:"special_menu",name:"🍹 Speciál",price:0,category:"Nápoje",type:"drink"},
 {id:"cukrovinky_menu",name:"🍬 Cukrovinky",price:0,category:"Nápoje",type:"sweets"}
 ];
 const SHOTS=[
-{id:"jeger",name:"Jägermeister",price:45},{id:"heffron",name:"Heffron",price:45},{id:"finska",name:"Finská",price:45},{id:"zelena",name:"Zelená",price:40},{id:"gin",name:"Gin",price:45},{id:"jack",name:"Jack Daniels",price:55},{id:"jameson",name:"Jameson",price:55},{id:"diplomatico",name:"Diplomatico",price:100}
+{id:"jeger",name:"Jägermeister",price:50},{id:"heffron",name:"Heffron",price:50},{id:"bosacka",name:"Bošácká slivovice",price:50},{id:"finska",name:"Finská vodka",price:50},{id:"zelena",name:"Zelená",price:40},{id:"gin",name:"Gin Beefeater",price:50},{id:"jack",name:"Jack Daniels Honey",price:70},{id:"jameson",name:"Jameson",price:70},{id:"diplomatico",name:"Diplomatico",price:120}
 ];
 
 let cart={};
@@ -615,10 +632,12 @@ bindDynamic();
 
 function addProduct(id){
 if(id==="parek_v_rohliku"){showModal("parekModal");return}
+if(id==="palacinka"){showModal("palacinkaModal");return}
 if(id==="cep_menu"){showModal("tapModal");return}
 if(id==="piti_menu"){showModal("drinkModal");return}
 if(id==="cukrovinky_menu"){showModal("candyModal");return}
 if(id==="panaky_menu"){openShots();return}
+if(id==="special_menu"){showModal("specialModal");return}
 
 const p=productById(id);
 if(!p)return;
@@ -1614,6 +1633,20 @@ document.querySelectorAll("[data-parek]").forEach(function(b){
       "parek_"+b.dataset.parek.replaceAll(" ","_"),
       "Párek v rohlíku - "+b.dataset.parek,
       30,
+      "Jídlo",
+      "food"
+    );
+  };
+});
+
+
+document.querySelectorAll("[data-palacinka]").forEach(function(b){
+  b.onclick=function(){
+    closeModal("palacinkaModal");
+    addCustomProduct(
+      "palacinka_"+b.dataset.palacinka.toLowerCase().replaceAll(" ","_").normalize("NFD").replace(/[\u0300-\u036f]/g,""),
+      "Palačinka - "+b.dataset.palacinka,
+      40,
       "Jídlo",
       "food"
     );
