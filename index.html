@@ -780,13 +780,17 @@ flash("Lístek otevřen");
 
 function clearActiveTicket(){activeTicketId=null;activeTicketSessionCounts={};renderAll();flash("Lístek zavřen")}
 function createTicket(){
+if(cartItems().length){
+  alert("Lístek nejde vytvořit z položek v košíku. Nejdřív objednávku zaplať, nebo vymaž košík. Lístek se vytváří pouze prázdný.");
+  return;
+}
+
 const name=prompt("Zadej jméno pro lístek:");
 if(!name||!name.trim()){
   alert("Musíš zadat jméno.");
   return;
 }
 
-const items=cartItems();
 const ticket={
   id:Date.now(),
   note:name.trim(),
@@ -794,26 +798,19 @@ const ticket={
   createdAt:new Date().toISOString(),
   items:[],
   groups:[],
+  history:[],
   total:0
 };
 
 tickets.unshift(ticket);
 activeTicketId=ticket.id;
 activeTicketSessionCounts={};
+activeTicketHistorySessionId=null;
 activeTicketGroupId=null;
-
-if(items.length){
-  const foodNumber=newFoodNumberIfNeeded(items);
-  const group=startTicketGroup(ticket);
-  if(foodNumber) group.foodNumber=foodNumber;
-  items.forEach(i=>addItemObjectToTicket(ticket,i));
-  createKitchenOrder(ticket.id,ticket.note,foodNumber,items);
-  cart={};
-}
 
 save();
 renderAll();
-flash("Lístek vytvořen");
+flash("Prázdný lístek vytvořen");
 }
 
 function createPaidOrder(){const items=cartItems();if(!items.length){alert("Nejdřív vyber položky.");return}window.lastPendingAmount=cartTotal(); window.lastPendingAmount=cartTotal(); pendingPayment=method=>finishPaidOrder(method);showModal("paymentModal")}
