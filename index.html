@@ -244,6 +244,13 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}th,td{b
   font-size:22px;
 }
 
+
+.big-tap-btn{
+  min-height:120px!important;
+  font-size:30px!important;
+  border-radius:24px!important;
+}
+
 </style>
 </head>
 <body>
@@ -261,7 +268,7 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}th,td{b
 </div></section>
 
 <section id="screen-drinks" class="screen"><div class="pos-layout">
-<div><div class="card"><h2 class="section-title">🍺 Pití / cukrovinky</h2><div id="drinkProducts"></div></div><div class="card"><h2 class="section-title">Otevřené lístky</h2><div id="quickTicketsDrinks"></div></div></div>
+<div><div class="card"><h2 class="section-title">🍺 Pití</h2><div id="drinkProducts"></div></div><div class="card"><h2 class="section-title">Otevřené lístky</h2><div id="quickTicketsDrinks"></div></div></div>
 <aside class="side-panel"><div class="card"><h2 class="section-title">Košík</h2><div id="activeTicketBannerDrinks"></div><div class="cart-total"><span id="cartLabelDrinks">Celkem</span><span id="cartTotalDrinks">0 Kč</span></div><div id="cartListDrinks"></div><div class="big-actions" id="actionsDrinks"><button class="big-btn primary" id="paidBtnDrinks">💵 ZAPLATIT</button><button class="big-btn blue" id="ticketBtnDrinks">VYTVOŘIT LÍSTEK</button><button class="big-btn ghost" id="clearBtnDrinks" type="button" onclick="clearCartSafe()">VYMAZAT KOŠÍK</button></div></div><div class="card"><h2 class="section-title">Objednávky</h2><div id="activeOrdersDrinks"></div></div></aside>
 </div></section>
 
@@ -289,25 +296,24 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}th,td{b
 <div class="modal-backdrop" id="palacinkaModal"><div class="modal"><h3>Palačinka</h3><div class="modal-buttons"><button class="primary" data-palacinka="Nutella">NUTELLA</button><button class="yellow" data-palacinka="Marmeláda">MARMELÁDA</button></div></div></div>
 
 <div class="popup-backdrop" id="tapModal"><div class="popup"><h2 style="margin-top:0;text-align:center;font-size:32px">🍺 Na čepu</h2><div class="popup-grid">
-<div style="grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-<button class="tap-btn" data-simple='{"id":"radegast10","name":"Radegast 10°","price":45,"category":"Na čepu","type":"drink"}'>Radegast 10°<br>45 Kč</button>
-<button class="tap-btn" data-simple='{"id":"radegast12","name":"Radegast 12°","price":50,"category":"Na čepu","type":"drink"}'>Radegast 12°<br>50 Kč</button>
+<div style="grid-column:1/-1;display:grid;grid-template-columns:1fr;gap:16px;">
+<button class="tap-btn big-tap-btn" data-simple='{"id":"radegast10","name":"Radegast 10°","price":45,"category":"Na čepu","type":"drink"}'>Radegast 10°<br>45 Kč</button>
 </div>
-<div style="grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-<button class="tap-btn" data-simple='{"id":"birell","name":"Birell","price":45,"category":"Na čepu","type":"drink"}'>Birell<br>45 Kč</button>
-<button class="tap-btn" data-simple='{"id":"malinovka","name":"Malinovka","price":40,"category":"Na čepu","type":"drink"}'>Malinovka<br>40 Kč</button>
+<div style="grid-column:1/-1;display:grid;grid-template-columns:1fr;gap:16px;">
+<button class="tap-btn big-tap-btn" data-simple='{"id":"birell","name":"Birell","price":45,"category":"Na čepu","type":"drink"}'>Birell<br>45 Kč</button>
+<button class="tap-btn big-tap-btn" data-simple='{"id":"malinovka","name":"Malinovka","price":40,"category":"Na čepu","type":"drink"}'>Malinovka<br>40 Kč</button>
 </div>
 </div><button class="big-btn ghost" style="width:100%;margin-top:16px" data-close="tapModal">ZAVŘÍT</button></div></div>
 
-<div class="popup-backdrop" id="drinkModal"><div class="popup"><h2 style="margin-top:0;text-align:center;font-size:32px">🥤 Pití</h2><div class="popup-grid"><button class="drink-btn" data-simple='{"id":"voda","name":"Voda","price":25,"category":"Pití","type":"drink"}'>Voda<br>25 Kč</button><button class="drink-btn" data-simple='{"id":"kava","name":"Káva","price":30,"category":"Pití","type":"drink"}'>Káva<br>30 Kč</button><button class="drink-btn" data-simple='{"id":"cocacola","name":"Coca Cola","price":30,"category":"Pití","type":"drink"}'>Coca Cola<br>30 Kč</button><button class="drink-btn" data-simple='{"id":"tonic","name":"Tonic","price":30,"category":"Pití","type":"drink"}'>Tonic<br>30 Kč</button><button class="drink-btn" data-simple='{"id":"redbull","name":"Red Bull","price":50,"category":"Pití","type":"drink"}'>Red Bull<br>50 Kč</button><button class="drink-btn" data-simple='{"id":"dzinus","name":"Džus","price":40,"category":"Pití","type":"drink"}'>Džus<br>40 Kč</button></div><button class="big-btn ghost" style="width:100%;margin-top:16px" data-close="drinkModal">ZAVŘÍT</button></div></div>
+<div class="popup-backdrop" id="drinkModal"><div class="popup"><h2 style="margin-top:0;text-align:center;font-size:32px">🥤 Pití</h2><div class="popup-grid"><button class="drink-btn" data-simple='{"id":"voda","name":"Voda","price":25,"category":"Pití","type":"drink"}'>Voda<br>25 Kč</button><button class="drink-btn" data-simple='{"id":"kava","name":"Káva","price":30,"category":"Pití","type":"drink"}'>Káva<br>30 Kč</button><button class="drink-btn" data-simple='{"id":"cocacola","name":"Coca Cola","price":30,"category":"Pití","type":"drink"}'>Coca Cola<br>30 Kč</button><button class="drink-btn" data-simple='{"id":"tonic","name":"Tonic","price":30,"category":"Pití","type":"drink"}'>Tonic<br>30 Kč</button><button class="drink-btn" data-simple='{"id":"redbull","name":"Red Bull","price":50,"category":"Pití","type":"drink"}'>Red Bull<br>50 Kč</button><button class="drink-btn" data-simple='{"id":"dzinus","name":"Džus","price":30,"category":"Pití","type":"drink"}'>Džus<br>30 Kč</button></div><button class="big-btn ghost" style="width:100%;margin-top:16px" data-close="drinkModal">ZAVŘÍT</button></div></div>
 
 
 <div class="popup-backdrop" id="specialModal"><div class="popup"><h2 style="margin-top:0;text-align:center;font-size:32px">🍹 Speciál</h2><div class="popup-grid">
 <button class="drink-btn" data-simple='{"id":"aperol_spritz","name":"Aperol Spritz","price":80,"category":"Speciál","type":"drink"}'>Aperol Spritz<br>80 Kč</button>
-<button class="drink-btn" data-simple='{"id":"prosecco","name":"Prosecco 1,5 dcl","price":56,"category":"Speciál","type":"drink"}'>Prosecco 1,5 dcl<br>56 Kč</button>
+<button class="drink-btn" data-simple='{"id":"prosecco","name":"Prosecco 2 dcl","price":55,"category":"Speciál","type":"drink"}'>Prosecco 2 dcl<br>55 Kč</button>
 </div><button class="big-btn ghost" style="width:100%;margin-top:16px" data-close="specialModal">ZAVŘÍT</button></div></div>
 
-<div class="popup-backdrop" id="candyModal"><div class="popup"><h2 style="margin-top:0;text-align:center;font-size:32px">🍬 Cukrovinky</h2><div class="popup-grid"><button class="candy-btn" data-simple='{"id":"brumik","name":"Brumík","price":15,"category":"Cukrovinky","type":"sweets"}'>Brumík<br>15 Kč</button><button class="candy-btn" data-simple='{"id":"tycinky","name":"Tyčinky","price":20,"category":"Cukrovinky","type":"sweets"}'>Tyčinky<br>20 Kč</button><button class="candy-btn" data-simple='{"id":"pendrek","name":"Pendrek","price":5,"category":"Cukrovinky","type":"sweets"}'>Pendrek<br>5 Kč</button><button class="candy-btn" data-simple='{"id":"zele_mys","name":"Želé myš","price":5,"category":"Cukrovinky","type":"sweets"}'>Želé myš<br>5 Kč</button></div><button class="big-btn ghost" style="width:100%;margin-top:16px" data-close="candyModal">ZAVŘÍT</button></div></div>
+<div class="popup-backdrop" id="candyModal"><div class="popup"><h2 style="margin-top:0;text-align:center;font-size:32px">🍬 Cukrovinky</h2><div class="popup-grid"><button class="candy-btn" data-simple='{"id":"brumik","name":"Brumík","price":15,"category":"Cukrovinky","type":"sweets"}'>Brumík<br>15 Kč</button><button class="candy-btn" data-simple='{"id":"tycinky","name":"Tyčinky","price":20,"category":"Cukrovinky","type":"sweets"}'>Tyčinky<br>20 Kč</button><button class="candy-btn" data-simple='{"id":"pendrek","name":"Pendrek","price":5,"category":"Cukrovinky","type":"sweets"}'>Pendrek<br>5 Kč</button><button class="candy-btn" data-simple='{"id":"zele_mys","name":"Želé myš","price":5,"category":"Cukrovinky","type":"sweets"}'>Želé myš<br>5 Kč</button><button class="candy-btn" data-simple='{"id":"tatranka","name":"Tatranka","price":20,"category":"Cukrovinky","type":"sweets"}'>Tatranka<br>20 Kč</button><button class="candy-btn" data-simple='{"id":"ledova_trist","name":"Ledová tříšť","price":30,"category":"Cukrovinky","type":"sweets"}'>Ledová tříšť<br>30 Kč</button><button class="candy-btn" data-simple='{"id":"bramburky","name":"Brambůrky","price":30,"category":"Cukrovinky","type":"sweets"}'>Brambůrky<br>30 Kč</button></div><button class="big-btn ghost" style="width:100%;margin-top:16px" data-close="candyModal">ZAVŘÍT</button></div></div>
 
 <div class="popup-backdrop" id="shotModal"><div class="popup"><h2 style="margin-top:0;text-align:center;font-size:32px">🥃 Panáky</h2><div id="shotGrid" class="popup-grid"></div><button class="big-btn ghost" style="width:100%;margin-top:16px" data-close="shotModal">ZAVŘÍT</button></div></div>
 
@@ -319,14 +325,10 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}th,td{b
     <h2 style="margin-top:0;">QR Platba</h2>
     <div id="qrAmountPreview" style="font-size:42px;font-weight:900;margin:20px 0;color:#111827;">0 Kč</div>
     <div style="background:#f3f4f6;border-radius:20px;padding:20px;margin-bottom:16px;">
-      <div style="width:220px;height:220px;background:white;border:3px dashed #9ca3af;border-radius:20px;margin:0 auto;display:flex;align-items:center;justify-content:center;font-weight:900;color:#6b7280;padding:20px;">
-        QR KÓD<br>SE DOPLNÍ<br>POZDĚJI
-      </div>
+      <img id="qrCodeImg" alt="QR platba" style="width:240px;height:240px;background:white;border-radius:20px;margin:0 auto;display:block;padding:8px;">
     </div>
     <div class="small" style="margin-bottom:16px;">
-      Zatím bez čísla účtu.<br>
-      Po doplnění účtu se zde bude generovat skutečný QR kód.
-    </div>
+      Účet: 3437941018/3030<br>IBAN: CZ3830300000003437941018</div>
     <button class="big-btn primary" style="width:100%" type="button" onclick="confirmQrPayment()">POTVRDIT ZAPLACENÍ</button>
     <button class="big-btn ghost" style="width:100%;margin-top:10px" type="button" data-close="qrPreviewModal">ZAVŘÍT</button>
   </div>
@@ -405,13 +407,12 @@ const PASSWORD="123456";
 const PRODUCTS=[
 {id:"parek_v_rohliku",name:"Párek v rohlíku",price:30,category:"Jídlo",type:"food"},
 {id:"hermelin",name:"Hermelín",price:80,category:"Jídlo",type:"food"},
-{id:"burger",name:"Burger",price:230,category:"Jídlo",type:"food"},
+{id:"burger",name:"Burger",price:200,category:"Jídlo",type:"food"},
 {id:"grilovane_maso",name:"Grilované maso",price:140,category:"Jídlo",type:"food"},
-{id:"palacinka",name:"Palačinka",price:40,category:"Jídlo",type:"food"},
+{id:"palacinka",name:"Palačinka",price:40,category:"Jídlo",type:"food"},{id:"cukrovinky_menu",name:"🍬 Cukrovinky",price:0,category:"Jídlo",type:"food"},
 {id:"cep_menu",name:"🍺 Na čepu",price:0,category:"Nápoje",type:"drink"},
 {id:"piti_menu",name:"🥤 Pití",price:0,category:"Nápoje",type:"drink"},
-{id:"panaky_menu",name:"🥃 Panáky",price:0,category:"Nápoje",type:"drink"},{id:"special_menu",name:"🍹 Speciál",price:0,category:"Nápoje",type:"drink"},
-{id:"cukrovinky_menu",name:"🍬 Cukrovinky",price:0,category:"Nápoje",type:"sweets"}
+{id:"panaky_menu",name:"🥃 Panáky",price:0,category:"Nápoje",type:"drink"},{id:"special_menu",name:"🍹 Speciál",price:0,category:"Nápoje",type:"drink"}
 ];
 const SHOTS=[
 {id:"jeger",name:"Jägermeister",price:50},{id:"heffron",name:"Heffron",price:50},{id:"bosacka",name:"Bošácká slivovice",price:50},{id:"finska",name:"Finská vodka",price:50},{id:"zelena",name:"Zelená",price:40},{id:"gin",name:"Gin Beefeater",price:50},{id:"jack",name:"Jack Daniels Honey",price:70},{id:"jameson",name:"Jameson",price:70},{id:"diplomatico",name:"Diplomatico",price:120}
@@ -489,7 +490,12 @@ function closeModal(id){byId(id).style.display="none"}
 function cartItems(){return Object.keys(cart).map(id=>{const p=productById(id);return{id,name:p.name,category:p.category,type:p.type,price:p.price,qty:cart[id],total:p.price*cart[id]}})}
 function cartTotal(){return cartItems().reduce((s,i)=>s+i.total,0)}
 function hasFood(items){return items.some(i=>i.type==="food")}
-function newFoodNumberIfNeeded(items){return hasFood(items)?nextFoodNumber++:null}
+function getNextFoodNumber(){
+  const number = nextFoodNumber;
+  nextFoodNumber = nextFoodNumber >= 200 ? 1 : nextFoodNumber + 1;
+  return number;
+}
+function newFoodNumberIfNeeded(items){return hasFood(items)?getNextFoodNumber():null}
 function createKitchenOrder(parentId,note,foodNumber,items){const foodItems=items.filter(i=>i.type==="food");if(!foodItems.length)return;kitchenOrders.unshift({id:Date.now()+Math.floor(Math.random()*10000),parentId,note,foodNumber,createdAt:new Date().toISOString(),items:foodItems,total:foodItems.reduce((s,i)=>s+i.total,0)})}
 
 function showTab(tab){document.querySelectorAll(".screen").forEach(e=>e.classList.remove("active"));document.querySelectorAll(".tab-btn").forEach(e=>e.classList.remove("active"));byId("screen-"+tab).classList.add("active");document.querySelector('.tab-btn[data-tab="'+tab+'"]').classList.add("active");renderAll()}
@@ -560,7 +566,7 @@ function addFoodItemToKitchenForGroup(ticket,group,item){
   if(item.type!=="food") return;
 
   if(!group.foodNumber){
-    group.foodNumber=nextFoodNumber++;
+    group.foodNumber=getNextFoodNumber();
   }
 
   let kitchenOrder=kitchenOrders.find(k=>k.parentId===ticket.id && k.groupId===group.id);
@@ -689,7 +695,7 @@ function addFoodToKitchenForCurrentTicketSession(ticket,item){
   const group = getCurrentTicketHistoryGroupObject(ticket);
 
   if(!group.foodNumber){
-    group.foodNumber = nextFoodNumber++;
+    group.foodNumber = getNextFoodNumber();
   }
 
   let kitchenOrder = kitchenOrders.find(k =>
@@ -1540,10 +1546,20 @@ function getCurrentPaymentAmount(){
 }
 
 function showQrPreview(amount){
-  const finalAmount = amount || getCurrentPaymentAmount() || 0;
-  const amountEl = byId("qrAmountPreview");
-  if(amountEl) amountEl.textContent = money(finalAmount);
-  closeModal("paymentModal");
+  amount = Number(amount || window.lastPendingAmount || 0);
+  window.lastPendingAmount = amount;
+
+  const amountEl = document.getElementById("qrAmountPreview");
+  if(amountEl){
+    amountEl.textContent = amount + " Kč";
+  }
+
+  const qrImg = document.getElementById("qrCodeImg");
+  if(qrImg){
+    const spd = "SPD*1.0*ACC:CZ3830300000003437941018*AM:" + amount.toFixed(2) + "*CC:CZK*MSG:OBJEDNAVKA";
+    qrImg.src = "https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=" + encodeURIComponent(spd);
+  }
+
   showModal("qrPreviewModal");
 }
 
